@@ -128,12 +128,14 @@ html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sa
   background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
   padding:28px 24px;display:flex;flex-direction:column;border:1px solid var(--border);
 }
-.graph-card canvas{flex:1;width:100%!important;max-height:260px}
+.graph-card-bar{height:350px;position:relative}
+.graph-card-bar canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important}
 .graph-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--dark);margin:0 0 16px 0;font-weight:400}
 
 /* donut specific */
-.graph-donut-inner{display:flex;gap:24px;align-items:flex-start}
-.graph-donut-inner canvas{width:180px!important;height:180px!important;flex-shrink:0}
+.graph-donut-inner{display:flex;gap:24px;align-items:center}
+.graph-donut-canvas-wrap{width:200px;height:200px;flex-shrink:0;position:relative}
+.graph-donut-canvas-wrap canvas{width:200px!important;height:200px!important}
 .donut-legend-col{display:flex;flex-direction:column;gap:10px;padding-top:8px}
 .donut-legend-item{display:flex;align-items:center;gap:10px;font-size:0.85rem;color:var(--dark);font-weight:500}
 .donut-dot{width:10px;height:10px;border-radius:50%}
