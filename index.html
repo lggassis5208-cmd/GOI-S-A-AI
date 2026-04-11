@@ -35,6 +35,10 @@
             <span class="kpi-label">Despesas</span>
             <span class="kpi-value">R$ 0,00</span>
           </div>
+          <div class="kpi-card lucro" id="kpiLucro">
+            <span class="kpi-label">Lucro</span>
+            <span class="kpi-value">R$ 0,00</span>
+          </div>
         </div>
         <div class="graph-row">
           <div class="graph-bar">
@@ -122,9 +126,11 @@
 
     function render() {
       save();
+      var lucro = state.fat - state.desp;
       document.querySelector('#kpiFat .kpi-value').textContent = 'R$ ' + state.fat.toFixed(2).replace('.', ',');
       document.querySelector('#kpiPed .kpi-value').textContent = state.ped;
       document.querySelector('#kpiDesp .kpi-value').textContent = 'R$ ' + state.desp.toFixed(2).replace('.', ',');
+      document.querySelector('#kpiLucro .kpi-value').textContent = 'R$ ' + lucro.toFixed(2).replace('.', ',');
       renderPedidos();
       renderFinanceiro();
       renderEquipe();
@@ -261,9 +267,9 @@
       if (origemData[0] === 0 && origemData[1] === 0 && origemData[2] === 0) origemData = [1,1,1];
       if (window.origemChart) window.origemChart.destroy();
       window.origemChart = new Chart(ctxDonut, {
-        type: 'pie',
-        data: { labels: origemLabels, datasets: [{ data: origemData, backgroundColor: origemColors, borderWidth: 2, borderColor: '#fff' }] },
-        options: { plugins: { legend: { display: false } } }
+        type: 'doughnut',
+        data: { labels: origemLabels, datasets: [{ data: origemData, backgroundColor: origemColors, borderWidth: 3, borderColor: '#fff' }] },
+        options: { cutout: '70%', plugins: { legend: { display: false } } }
       });
       var total = origemData[0] + origemData[1] + origemData[2];
       document.getElementById('donutLegend').innerHTML = origemLabels.map(function(l, i) {
