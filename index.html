@@ -59,7 +59,15 @@
         <div class="dashboard-grid">
           <div class="dashboard-charts">
             <div class="graph-card">
-              <h3 class="graph-title">Faturamento Semanal</h3>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                <h3 class="graph-title" id="chartFatTitle" style="margin-bottom:0">Faturamento Semanal</h3>
+                <div class="filtro-periodo-row">
+                  <button class="filtro-btn active" data-periodo="semanal" onclick="setChartPeriodo('semanal')">Semanal</button>
+                  <button class="filtro-btn" data-periodo="mensal" onclick="setChartPeriodo('mensal')">Mensal</button>
+                  <button class="filtro-btn" data-periodo="trimestral" onclick="setChartPeriodo('trimestral')">Trimestral</button>
+                  <button class="filtro-btn" data-periodo="anual" onclick="setChartPeriodo('anual')">Anual</button>
+                </div>
+              </div>
               <div class="graph-card-bar">
                 <canvas id="chartFat"></canvas>
               </div>
@@ -86,6 +94,7 @@
         <div class="pedido-actions">
           <button class="pedido-btn" onclick="simularPedido('iFood')">+ Pedido iFood</button>
           <button class="pedido-btn n99" onclick="simularPedido('99Food')">+ Pedido 99Food</button>
+          <button class="pedido-btn" style="background:#34C759;color:#fff" onclick="monitorarPlataformas()" id="btnMonitor">▶ Monitorar</button>
           <input class="pedido-search" type="text" placeholder="Buscar pedido..." oninput="filtrarPedidos(this.value)">
         </div>
         <div class="pedido-grid" id="pedidoGrid"></div>
@@ -157,6 +166,8 @@
     var STORAGE_KEY = 'goias-acai-erp-state';
     var userRole = 'dono';
     var filtroData = 'todos';
+    var chartPeriodo = 'semanal';
+    var monitorInterval = null;
     var timerIntervals = {};
     var state = { pedidos: [], contas: [], funcionarios: [], transacoes: [], desp: 0, fat: 0, ped: 0 };
 
@@ -280,19 +291,32 @@
     }
 
     /* ========== PEDIDOS ========== */
-    function simularPedido(canal) {
+    function simularPedido(canal, autoprint) {
       var nomes = ['Ana','Bruno','Carla','Diego','Eva','Felipe','Gabi','Hugo','Isabela','João'];
       var nome = nomes[Math.floor(Math.random() * nomes.length)];
       var valor = parseFloat((Math.random() * 40 + 10).toFixed(2));
-      state.pedidos.push({
+      var pedido = {
         id: Date.now(), canal: canal, nome: nome, valor: valor,
         status: 'Pendente', criadoEm: new Date().toISOString(), timerEnd: null
-      });
+      };
+      state.pedidos.push(pedido);
       state.ped++;
       state.fat += valor;
       state.transacoes.push({ tipo: 'entrada', valor: valor, data: new Date().toISOString() });
       toast('Pedido ' + canal + ' de ' + nome + ' registrado!', 'success');
       render();
+      if (autoprint) imprimirComanda(pedido.id);
+    }
+
+    /* ========== MONITORAR PLATAFORMAS (simulação) ========== */
+    function monitorarPlataformas() {
+      if (monitorInterval) { clearInterval(monitorInterval); monitorInterval = null; toast('Monitor de plataformas pausado', 'info'); return; }
+      toast('Monitorando iFood e 99Food...', 'success');
+      monitorInterval = setInterval(function() {
+        var canais = ['iFood','99Food'];
+        var canal = canais[Math.floor(Math.random() * canais.length)];
+        simularPedido(canal, true);
+      }, 30000);
     }
     function avancarStatusPedido(id) {
       var p = state.pedidos.find(function(x) { return x.id === id; });
@@ -542,6 +566,73 @@
       }).join('') : '<tr><td colspan="4" style="color:#8E8E93;text-align:center;padding:24px">Nenhum funcionário.</td></tr>';
     }
 
+    /* ========== CHART PERIODO ========== */
+    function setChartPeriodo(p) {
+      chartPeriodo = p;
+      document.querySelectorAll('.filtro-periodo-row .filtro-btn').forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-periodo') === p);
+      });
+      var titles = { semanal:'Faturamento Semanal', mensal:'Faturamento Mensal', trimestral:'Faturamento Trimestral', anual:'Faturamento Anual' };
+      var el = document.getElementById('chartFatTitle');
+      if (el) el.textContent = titles[p] || 'Faturamento';
+      renderChart();
+    }
+    function getChartData() {
+      var now = new Date();
+      if (chartPeriodo === 'semanal') {
+        var labels = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+        var vals = [0,0,0,0,0,0,0];
+        state.transacoes.forEach(function(t) {
+          if (t.tipo === 'entrada') { var d = new Date(t.data).getDay(); vals[d === 0 ? 6 : d - 1] += t.valor; }
+        });
+        return { labels: labels, data: vals };
+      }
+      if (chartPeriodo === 'mensal') {
+        var labels = []; var vals = [];
+        for (var i = 0; i < 30; i++) {
+          var day = new Date(now); day.setDate(now.getDate() - 29 + i);
+          labels.push(day.getDate() + '/' + (day.getMonth() + 1));
+          var total = 0;
+          state.transacoes.forEach(function(t) {
+            if (t.tipo === 'entrada' && new Date(t.data).toDateString() === day.toDateString()) total += t.valor;
+          });
+          vals.push(total);
+        }
+        return { labels: labels, data: vals };
+      }
+      if (chartPeriodo === 'trimestral') {
+        var labels = []; var vals = [];
+        for (var i = 2; i >= 0; i--) {
+          var m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          var name = m.toLocaleString('pt-BR', { month: 'short' });
+          labels.push(name);
+          var total = 0;
+          state.transacoes.forEach(function(t) {
+            var td = new Date(t.data);
+            if (t.tipo === 'entrada' && td.getMonth() === m.getMonth() && td.getFullYear() === m.getFullYear()) total += t.valor;
+          });
+          vals.push(total);
+        }
+        return { labels: labels, data: vals };
+      }
+      if (chartPeriodo === 'anual') {
+        var labels = []; var vals = [];
+        for (var i = 11; i >= 0; i--) {
+          var m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          var name = m.toLocaleString('pt-BR', { month: 'short' });
+          labels.push(name);
+          var total = 0;
+          state.transacoes.forEach(function(t) {
+            var td = new Date(t.data);
+            if (t.tipo === 'entrada' && td.getMonth() === m.getMonth() && td.getFullYear() === m.getFullYear()) total += t.valor;
+          });
+          vals.push(total);
+        }
+        return { labels: labels, data: vals };
+      }
+      return { labels: [], data: [] };
+    }
+
     /* ========== CHARTS (Chart.js safety check) ========== */
     function renderChart() {
       if (typeof Chart === 'undefined') {
@@ -559,22 +650,15 @@
       var ctxDonut = document.getElementById('chartOrigem');
       if (!ctxBar || !ctxDonut) return;
 
-      /* Bar Chart */
-      var dias = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-      var semana = [0,0,0,0,0,0,0];
-      state.transacoes.forEach(function(t) {
-        if (t.tipo === 'entrada') {
-          var d = new Date(t.data).getDay();
-          semana[d === 0 ? 6 : d - 1] += t.valor;
-        }
-      });
+      /* Bar Chart (period-aware) */
+      var cd = getChartData();
       if (window.fatChart) window.fatChart.destroy();
-      var grad = ctxBar.getContext('2d').createLinearGradient(0, 0, 0, 260);
+      var grad = ctxBar.getContext('2d').createLinearGradient(0, 0, 0, 350);
       grad.addColorStop(0, 'rgba(255,215,0,0.55)');
       grad.addColorStop(1, 'rgba(255,215,0,0.05)');
       window.fatChart = new Chart(ctxBar, {
         type: 'bar',
-        data: { labels: dias, datasets: [{ label: 'Faturamento', data: semana, backgroundColor: grad, borderColor: '#FFD700', borderWidth: 2, borderRadius: 10, maxBarThickness: 44 }] },
+        data: { labels: cd.labels, datasets: [{ label: 'Faturamento', data: cd.data, backgroundColor: grad, borderColor: '#FFD700', borderWidth: 2, borderRadius: 10, maxBarThickness: 44 }] },
         options: {
           responsive: true,
           maintainAspectRatio: false,
