@@ -1,0 +1,280 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Goiás Açaí ERP</title>
+  <meta name="viewport" content="width=1920, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=DM+Serif+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="erp-root">
+    <aside class="sidebar">
+      <h1>Goiás Açaí</h1>
+      <nav>
+        <button class="sidebar-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="sidebar-btn" data-tab="pedidos">Pedidos</button>
+        <button class="sidebar-btn" data-tab="financeiro">Financeiro</button>
+        <button class="sidebar-btn" data-tab="equipe">Equipe</button>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <section id="dashboard" class="active">
+        <h2 class="section-title">Dashboard</h2>
+        <div class="kpi-row">
+          <div class="kpi-card" id="kpiFat">
+            <span class="kpi-label">Faturamento</span>
+            <span class="kpi-value">R$ 0,00</span>
+          </div>
+          <div class="kpi-card" id="kpiPed">
+            <span class="kpi-label">Pedidos</span>
+            <span class="kpi-value">0</span>
+          </div>
+          <div class="kpi-card" id="kpiDesp">
+            <span class="kpi-label">Despesas</span>
+            <span class="kpi-value">R$ 0,00</span>
+          </div>
+        </div>
+        <div class="graph-row">
+          <div class="graph-bar">
+            <h3 class="graph-title">Faturamento Semanal</h3>
+            <canvas id="chartFat" width="500" height="280"></canvas>
+          </div>
+          <div class="graph-donut">
+            <h3 class="graph-title">Origem dos Pedidos</h3>
+            <canvas id="chartOrigem" width="260" height="260"></canvas>
+            <div id="donutLegend" class="donut-legend-row"></div>
+          </div>
+        </div>
+      </section>
+      <section id="pedidos">
+        <h2 class="section-title">Pedidos</h2>
+        <div class="pedido-actions">
+          <button class="pedido-btn" onclick="simularPedido('iFood')">+ Pedido iFood</button>
+          <button class="pedido-btn n99" onclick="simularPedido('99Food')">+ Pedido 99Food</button>
+          <input class="pedido-search" type="text" placeholder="Buscar pedido..." oninput="filtrarPedidos(this.value)">
+        </div>
+        <div class="pedido-grid" id="pedidoGrid"></div>
+      </section>
+      <section id="financeiro">
+        <h2 class="section-title">Financeiro</h2>
+        <div class="caixa-section">
+          <div class="caixa-col">
+            <h3 class="caixa-title">Contas a Receber</h3>
+            <form class="caixa-form" onsubmit="return addConta('receber',event)">
+              <input id="descReceber" placeholder="Descrição" required>
+              <input id="valorReceber" type="number" step="0.01" placeholder="Valor" required>
+              <input id="dataReceber" type="date" required>
+              <select id="catReceber"><option>Vendas</option><option>Serviços</option><option>Outros</option></select>
+              <button type="submit">Adicionar</button>
+            </form>
+            <div id="listaReceber" class="caixa-list"></div>
+          </div>
+          <div class="caixa-col">
+            <h3 class="caixa-title">Contas a Pagar</h3>
+            <form class="caixa-form" onsubmit="return addConta('pagar',event)">
+              <input id="descPagar" placeholder="Descrição" required>
+              <input id="valorPagar" type="number" step="0.01" placeholder="Valor" required>
+              <input id="dataPagar" type="date" required>
+              <select id="catPagar"><option>Fornecedores</option><option>Aluguel</option><option>Salários</option><option>Outros</option></select>
+              <button type="submit">Adicionar</button>
+            </form>
+            <div id="listaPagar" class="caixa-list"></div>
+          </div>
+        </div>
+      </section>
+      <section id="equipe">
+        <h2 class="section-title">Equipe</h2>
+        <form class="equipe-form" onsubmit="return addFuncionario(event)">
+          <input id="nomeFunc" placeholder="Nome" required>
+          <input id="cargoFunc" placeholder="Cargo" required>
+          <button type="submit">Adicionar</button>
+        </form>
+        <table class="equipe-table">
+          <thead><tr><th>Nome</th><th>Cargo</th><th>Status</th><th>Ação</th></tr></thead>
+          <tbody id="equipeBody"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  <div class="pedido-confirm" id="pedidoConfirm">Pedido registrado!</div>
+  <script>
+    var STORAGE_KEY = 'goias-acai-erp-state';
+    var state = { pedidos: [], contas: [], funcionarios: [], transacoes: [], desp: 0, fat: 0, ped: 0 };
+
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function load() {
+      var d = localStorage.getItem(STORAGE_KEY);
+      if (d) { try { state = JSON.parse(d); } catch(e) { localStorage.removeItem(STORAGE_KEY); } }
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.sidebar-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.tab === id); });
+      document.querySelectorAll('.main-content > section').forEach(function(s) { s.classList.remove('active'); });
+      var el = document.getElementById(id);
+      if (el) el.classList.add('active');
+      if (id === 'dashboard') renderChart();
+    }
+    document.querySelectorAll('.sidebar-btn').forEach(function(b) {
+      b.addEventListener('click', function() { showSection(b.dataset.tab); });
+    });
+
+    function render() {
+      save();
+      document.querySelector('#kpiFat .kpi-value').textContent = 'R$ ' + state.fat.toFixed(2).replace('.', ',');
+      document.querySelector('#kpiPed .kpi-value').textContent = state.ped;
+      document.querySelector('#kpiDesp .kpi-value').textContent = 'R$ ' + state.desp.toFixed(2).replace('.', ',');
+      renderPedidos();
+      renderFinanceiro();
+      renderEquipe();
+      renderChart();
+    }
+
+    function simularPedido(canal) {
+      var nomes = ['Ana','Bruno','Carla','Diego','Eva','Felipe','Gabi','Hugo'];
+      var nome = nomes[Math.floor(Math.random() * nomes.length)];
+      var valor = parseFloat((Math.random() * 40 + 10).toFixed(2));
+      state.pedidos.push({ id: Date.now(), canal: canal, nome: nome, valor: valor, status: 'Pendente' });
+      state.ped++;
+      state.fat += valor;
+      state.transacoes.push({ tipo: 'entrada', valor: valor, data: new Date().toISOString() });
+      showConfirm('Pedido ' + canal + ' registrado!');
+      render();
+    }
+    function avancarStatusPedido(id) {
+      var p = state.pedidos.find(function(x) { return x.id === id; });
+      if (!p) return;
+      if (p.status === 'Pendente') p.status = 'Em Preparo';
+      else if (p.status === 'Em Preparo') p.status = 'Saiu para Entrega';
+      else if (p.status === 'Saiu para Entrega') p.status = 'Concluído';
+      render();
+    }
+    function removerPedido(id) {
+      state.pedidos = state.pedidos.filter(function(x) { return x.id !== id; });
+      render();
+    }
+    function filtrarPedidos(q) { renderPedidos(q.toLowerCase()); }
+    function renderPedidos(filtro) {
+      var grid = document.getElementById('pedidoGrid');
+      var lista = state.pedidos;
+      if (filtro) lista = lista.filter(function(p) { return p.nome.toLowerCase().indexOf(filtro) >= 0 || p.canal.toLowerCase().indexOf(filtro) >= 0; });
+      if (!lista.length) { grid.innerHTML = '<div class="pedido-vazio">Nenhum pedido no momento.</div>'; return; }
+      var statusSteps = ['Pendente','Em Preparo','Saiu para Entrega','Concluído'];
+      grid.innerHTML = lista.map(function(p) {
+        var idx = statusSteps.indexOf(p.status);
+        var bars = statusSteps.map(function(_, i) { return '<div class="pedido-bar' + (i <= idx ? ' ativo' : '') + '"></div>'; }).join('');
+        var icone = p.canal === 'iFood' ? 'ifood' : 'n99';
+        return '<div class="pedido-card">' +
+          '<div class="pedido-card-top"><span class="pedido-icone ' + icone + '"></span><span class="pedido-id">#' + p.id + '</span></div>' +
+          '<div class="pedido-nome">' + p.nome + '</div>' +
+          '<div class="pedido-valor">R$ ' + p.valor.toFixed(2) + '</div>' +
+          '<div class="pedido-barra">' + bars + '</div>' +
+          '<div class="pedido-status-label">' + p.status + '</div>' +
+          '<div class="pedido-card-actions">' +
+            (p.status !== 'Concluído' ? '<button onclick="avancarStatusPedido(' + p.id + ')">Avançar</button>' : '') +
+            '<button onclick="removerPedido(' + p.id + ')">Remover</button>' +
+          '</div></div>';
+      }).join('');
+    }
+    function showConfirm(msg) {
+      var el = document.getElementById('pedidoConfirm');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(function() { el.style.display = 'none'; }, 2000);
+    }
+
+    function addConta(tipo, e) {
+      e.preventDefault();
+      var desc = document.getElementById(tipo === 'receber' ? 'descReceber' : 'descPagar').value.trim();
+      var valor = parseFloat(document.getElementById(tipo === 'receber' ? 'valorReceber' : 'valorPagar').value);
+      var data = document.getElementById(tipo === 'receber' ? 'dataReceber' : 'dataPagar').value;
+      var cat = document.getElementById(tipo === 'receber' ? 'catReceber' : 'catPagar').value;
+      if (!desc || isNaN(valor) || !data || !cat) return false;
+      state.contas.push({ desc: desc, valor: valor, tipo: tipo, data: data, categoria: cat, status: 'pendente' });
+      if (tipo === 'pagar') state.desp += valor;
+      if (tipo === 'receber') state.fat += valor;
+      e.target.reset();
+      render();
+      return false;
+    }
+    function renderFinanceiro() {
+      var receber = state.contas.filter(function(c) { return c.tipo === 'receber'; });
+      var pagar = state.contas.filter(function(c) { return c.tipo === 'pagar'; });
+      document.getElementById('listaReceber').innerHTML = receber.length ? receber.map(function(c) {
+        return '<div class="caixa-card entrada"><span class="caixa-desc">' + c.desc + '</span><span class="caixa-valor">R$ ' + c.valor.toFixed(2) + '</span><span class="caixa-date">' + c.data + '</span><span class="caixa-cat">' + c.categoria + '</span></div>';
+      }).join('') : '<p style="color:#aaa">Nenhuma conta a receber.</p>';
+      document.getElementById('listaPagar').innerHTML = pagar.length ? pagar.map(function(c) {
+        return '<div class="caixa-card saida"><span class="caixa-desc">' + c.desc + '</span><span class="caixa-valor">R$ ' + c.valor.toFixed(2) + '</span><span class="caixa-date">' + c.data + '</span><span class="caixa-cat">' + c.categoria + '</span></div>';
+      }).join('') : '<p style="color:#aaa">Nenhuma conta a pagar.</p>';
+    }
+
+    function addFuncionario(e) {
+      e.preventDefault();
+      var nome = document.getElementById('nomeFunc').value.trim();
+      var cargo = document.getElementById('cargoFunc').value.trim();
+      if (!nome || !cargo) return false;
+      state.funcionarios.push({ nome: nome, cargo: cargo, status: 'Ativo' });
+      e.target.reset();
+      render();
+      return false;
+    }
+    function removerFuncionario(i) {
+      state.funcionarios.splice(i, 1);
+      render();
+    }
+    function renderEquipe() {
+      var body = document.getElementById('equipeBody');
+      body.innerHTML = state.funcionarios.length ? state.funcionarios.map(function(f, i) {
+        return '<tr><td>' + f.nome + '</td><td>' + f.cargo + '</td><td class="' + (f.status === 'Ativo' ? 'ativo' : 'inativo') + '">' + f.status + '</td><td><button onclick="removerFuncionario(' + i + ')">Remover</button></td></tr>';
+      }).join('') : '<tr><td colspan="4" style="color:#aaa;text-align:center">Nenhum funcionário.</td></tr>';
+    }
+
+    function renderChart() {
+      var ctxBar = document.getElementById('chartFat');
+      var ctxDonut = document.getElementById('chartOrigem');
+      if (!ctxBar || !ctxDonut) return;
+      var dias = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+      var semana = [0,0,0,0,0,0,0];
+      state.transacoes.forEach(function(t) {
+        var d = new Date(t.data).getDay();
+        if (t.tipo === 'entrada') semana[d] += t.valor;
+      });
+      if (window.fatChart) window.fatChart.destroy();
+      var grad = ctxBar.getContext('2d').createLinearGradient(0, 0, 0, 280);
+      grad.addColorStop(0, 'rgba(109,40,217,0.38)');
+      grad.addColorStop(1, 'rgba(109,40,217,0.08)');
+      window.fatChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: { labels: dias, datasets: [{ label: 'Faturamento', data: semana, backgroundColor: grad, borderColor: '#6D28D9', borderWidth: 2, borderRadius: 16, maxBarThickness: 48 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
+      });
+      var origemContagem = { 'iFood': 0, '99Food': 0, 'Balcão': 0 };
+      state.pedidos.forEach(function(p) {
+        if (p.canal === 'iFood') origemContagem['iFood']++;
+        else if (p.canal === '99Food') origemContagem['99Food']++;
+        else origemContagem['Balcão']++;
+      });
+      var origemLabels = ['iFood','99Food','Balcão'];
+      var origemData = origemLabels.map(function(l) { return origemContagem[l]; });
+      var origemColors = ['#EA1D2C','#FFC107','#6D28D9'];
+      if (origemData[0] === 0 && origemData[1] === 0 && origemData[2] === 0) origemData = [1,1,1];
+      if (window.origemChart) window.origemChart.destroy();
+      window.origemChart = new Chart(ctxDonut, {
+        type: 'pie',
+        data: { labels: origemLabels, datasets: [{ data: origemData, backgroundColor: origemColors, borderWidth: 2, borderColor: '#fff' }] },
+        options: { plugins: { legend: { display: false } } }
+      });
+      var total = origemData[0] + origemData[1] + origemData[2];
+      document.getElementById('donutLegend').innerHTML = origemLabels.map(function(l, i) {
+        var pct = total ? Math.round((origemData[i] / total) * 100) : 0;
+        var dot = l === 'iFood' ? 'ifood' : l === '99Food' ? 'n99' : 'balcao';
+        return '<div class="donut-legend-item"><span class="donut-dot ' + dot + '"></span>' + l + ' (' + pct + '%)</div>';
+      }).join('');
+    }
+
+    load();
+    render();
+  </script>
+</body>
+</html>
