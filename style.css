@@ -114,10 +114,12 @@ html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sa
 .kpi-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-3px)}
 .kpi-label{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--gray-light);margin-bottom:12px}
 .kpi-value{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--dark);letter-spacing:-0.5px}
-.kpi-card.lucro{border-bottom:3px solid var(--accent)}
-.kpi-card.lucro .kpi-value{color:var(--accent-dark)}
+.kpi-card.lucro{border-bottom:3px solid var(--green)}
+.kpi-card.lucro .kpi-value{color:var(--green)}
 .kpi-card.negativo{border-bottom:3px solid var(--red)}
 .kpi-card.negativo .kpi-value{color:var(--red)}
+.kpi-card.despesa{border-bottom:3px solid var(--red)}
+.kpi-card.despesa .kpi-value{color:var(--red)}
 
 /* ============================================================
    DASHBOARD – 2-col: 70% graphs / 30% vendas recentes

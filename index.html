@@ -49,7 +49,7 @@
             <span class="kpi-label">Pedidos</span>
             <span class="kpi-value">0</span>
           </div>
-          <div class="kpi-card" id="kpiDesp">
+          <div class="kpi-card despesa" id="kpiDesp">
             <span class="kpi-label">Despesas</span>
             <span class="kpi-value">R$ 0,00</span>
           </div>
@@ -343,7 +343,7 @@
       document.querySelector('#kpiDesp .kpi-value').textContent = fmt(kpi.desp);
       document.querySelector('#kpiLucro .kpi-value').textContent = fmt(kpi.lucro);
       var lc = document.getElementById('kpiLucro');
-      lc.className = 'kpi-card lucro' + (kpi.lucro < 0 ? ' negativo' : '');
+      lc.className = 'kpi-card' + (kpi.lucro >= 0 ? ' lucro' : ' negativo');
       lc.setAttribute('data-role', 'dono');
       renderPedidos();
       renderUltimosPedidos();
