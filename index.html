@@ -39,6 +39,7 @@
       <section id="dashboard" class="active">
         <div class="alertas-urgentes" id="alertasUrgentes" style="display:none"></div>
         <h2 class="section-title">Dashboard</h2>
+        <div style="margin-bottom:20px"><button class="pedido-btn" style="background:#1A1A1A;color:#FFD700" onclick="runSimulacao()">▶ Executar Simulação Completa</button></div>
         <div class="kpi-row">
           <div class="kpi-card" id="kpiFat" data-role="dono">
             <span class="kpi-label">Faturamento</span>
@@ -885,6 +886,98 @@
     load();
     render();
     adjustScale();
+
+    /* ========== SIMULAÇÃO COMPLETA (demo) ========== */
+    function runSimulacao() {
+      toast('🎬 Iniciando simulação completa...', 'info');
+      var hoje = new Date().toISOString().substring(0, 10);
+      var amanha = new Date(Date.now() + 86400000).toISOString().substring(0, 10);
+
+      /* PASSO 1 — Cadastrar equipe (2s) */
+      setTimeout(function() {
+        toast('👥 Cadastrando equipe...', 'info');
+        state.funcionarios.push({ nome: 'Pedro', cargo: 'Proprietário', status: 'Ativo' });
+        state.funcionarios.push({ nome: 'Ana', cargo: 'Atendente', status: 'Ativo' });
+        state.funcionarios.push({ nome: 'Bruno', cargo: 'Preparador', status: 'Ativo' });
+        render();
+      }, 2000);
+
+      /* PASSO 2 — Conta a pagar vencendo HOJE (4s) */
+      setTimeout(function() {
+        toast('📋 Registrando conta a pagar (vence hoje)...', 'info');
+        state.contas.push({ desc: 'Fornecedor Polpas', valor: 850.00, tipo: 'pagar', data: hoje, categoria: 'Fornecedores' });
+        state.desp += 850;
+        state.contas.push({ desc: 'Aluguel Loja', valor: 2200.00, tipo: 'pagar', data: amanha, categoria: 'Aluguel' });
+        state.desp += 2200;
+        render();
+        toast('⚠ Contas próximas do vencimento! Veja os alertas.', 'error');
+      }, 4000);
+
+      /* PASSO 3 — Pedido iFood #1 (7s) */
+      setTimeout(function() {
+        toast('📦 Novo pedido iFood chegando...', 'info');
+        simularPedido('iFood');
+      }, 7000);
+
+      /* PASSO 4 — Pedido iFood #2 (9s) */
+      setTimeout(function() {
+        simularPedido('iFood');
+      }, 9000);
+
+      /* PASSO 5 — Pedido 99Food (11s) */
+      setTimeout(function() {
+        simularPedido('99Food');
+      }, 11000);
+
+      /* PASSO 6 — Avançar pedidos para "Em Preparo" (14s) */
+      setTimeout(function() {
+        toast('🔄 Avançando pedidos para preparo...', 'info');
+        var pendentes = state.pedidos.filter(function(p) { return p.status === 'Pendente'; });
+        pendentes.forEach(function(p) { avancarStatusPedido(p.id); });
+      }, 14000);
+
+      /* PASSO 7 — Avançar para "Saiu para Entrega" (17s) */
+      setTimeout(function() {
+        toast('🚀 Pedidos saindo para entrega...', 'info');
+        var emPreparo = state.pedidos.filter(function(p) { return p.status === 'Em Preparo'; });
+        emPreparo.forEach(function(p) { avancarStatusPedido(p.id); });
+      }, 17000);
+
+      /* PASSO 8 — Concluir primeiro pedido (19s) */
+      setTimeout(function() {
+        toast('✅ Concluindo primeiro pedido...', 'info');
+        var entrega = state.pedidos.filter(function(p) { return p.status === 'Saiu para Entrega'; });
+        if (entrega.length) avancarStatusPedido(entrega[0].id);
+      }, 19000);
+
+      /* PASSO 9 — Imprimir comanda do pedido ativo (21s) */
+      setTimeout(function() {
+        var ativo = state.pedidos.filter(function(p) { return p.status !== 'Concluído'; });
+        if (ativo.length) {
+          toast('🖨 Imprimindo comanda...', 'info');
+          imprimirComanda(ativo[0].id);
+        }
+      }, 21000);
+
+      /* PASSO 10 — Mostrar dashboard com gráficos atualizados (23s) */
+      setTimeout(function() {
+        showSection('dashboard');
+        toast('📊 Dashboard atualizado — gráficos, KPIs e alertas visíveis!', 'success');
+      }, 23000);
+
+      /* PASSO 11 — Exportar CSV (25s) */
+      setTimeout(function() {
+        showSection('financeiro');
+        toast('📥 Exportando relatório CSV...', 'info');
+        setTimeout(function() { exportarCSV(); }, 500);
+      }, 25000);
+
+      /* FIM (28s) */
+      setTimeout(function() {
+        showSection('dashboard');
+        toast('🎬 Simulação finalizada! Todas as funcionalidades demonstradas.', 'success');
+      }, 28000);
+    }
   </script>
 </body>
 </html>
