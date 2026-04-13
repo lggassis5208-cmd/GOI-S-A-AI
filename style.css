@@ -174,6 +174,34 @@ html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sa
 .vendas-vazio{color:var(--gray-light);text-align:center;padding:32px 0;font-size:0.9rem}
 
 /* ============================================================
+   TOP 3 PRODUTOS
+   ============================================================ */
+.top-produtos{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+.top-produtos-title{
+  font-family:'DM Serif Display',serif;font-size:1rem;color:var(--dark);
+  margin:0 0 14px 0;font-weight:400;
+}
+.top-produto-item{display:flex;align-items:center;gap:10px;padding:8px 0}
+.top-produto-rank{
+  font-weight:700;font-size:0.85rem;color:var(--accent-dark);
+  width:28px;text-align:center;flex-shrink:0;
+}
+.top-produto-info{flex:1;min-width:0}
+.top-produto-name{font-weight:600;font-size:0.85rem;color:var(--dark);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-produto-bar-wrap{height:6px;background:var(--gray-bg);border-radius:4px;overflow:hidden}
+.top-produto-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-dark));border-radius:4px;transition:width 0.5s ease}
+.top-produto-qty{font-weight:700;font-size:0.85rem;color:var(--gray-light);flex-shrink:0;min-width:28px;text-align:right}
+
+/* ============================================================
+   EXPORTAR CSV BUTTON
+   ============================================================ */
+.btn-exportar{
+  background:var(--dark)!important;color:var(--accent)!important;
+  border-color:var(--dark)!important;margin-left:auto;
+}
+.btn-exportar:hover{background:var(--accent)!important;color:var(--dark)!important}
+
+/* ============================================================
    PEDIDOS
    ============================================================ */
 .pedido-actions{display:flex;gap:14px;margin-bottom:28px;align-items:center}
@@ -389,9 +417,9 @@ html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sa
   .mobile-nav-btn.active{color:var(--accent-dark)}
   .mobile-nav-btn svg{stroke:currentColor}
 
-  /* Main content padding for bottom nav */
-  .main-content{padding-bottom:80px!important}
-  .main-content>section{padding:20px 16px!important}
+  /* Main content padding for bottom nav — extra space so buttons aren't covered */
+  .main-content{padding-bottom:100px!important}
+  .main-content>section{padding:20px 16px 32px!important}
   .section-title{font-size:1.3rem;margin-bottom:20px}
 
   /* KPI cards: stack vertically */

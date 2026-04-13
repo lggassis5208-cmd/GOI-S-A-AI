@@ -85,6 +85,11 @@
           <div class="vendas-recentes">
             <h3 class="vendas-recentes-title">Vendas Recentes</h3>
             <div class="vendas-recentes-list" id="vendasRecentesList"></div>
+            <!-- Top 3 Produtos -->
+            <div class="top-produtos" id="topProdutosCard">
+              <h4 class="top-produtos-title">Top 3 Produtos</h4>
+              <div id="topProdutosList"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -114,13 +119,14 @@
           <button class="filtro-btn" data-filtro="hoje" onclick="setFiltroData('hoje')">Hoje</button>
           <button class="filtro-btn" data-filtro="semana" onclick="setFiltroData('semana')">Esta Semana</button>
           <button class="filtro-btn" data-filtro="mes" onclick="setFiltroData('mes')">Este Mês</button>
+          <button class="filtro-btn btn-exportar" onclick="exportarCSV()">Exportar CSV</button>
         </div>
         <div class="caixa-section">
           <div class="caixa-col">
             <h3 class="caixa-title">Contas a Receber</h3>
             <form class="caixa-form" onsubmit="return addConta('receber',event)">
               <input id="descReceber" placeholder="Descrição" required>
-              <input id="valorReceber" type="number" step="0.01" placeholder="Valor" required>
+              <input id="valorReceber" type="number" step="0.01" min="0.01" placeholder="Valor" required>
               <input id="dataReceber" type="date" required>
               <select id="catReceber"><option>Vendas</option><option>Serviços</option><option>Outros</option></select>
               <button type="submit">Adicionar</button>
@@ -131,7 +137,7 @@
             <h3 class="caixa-title">Contas a Pagar</h3>
             <form class="caixa-form" onsubmit="return addConta('pagar',event)">
               <input id="descPagar" placeholder="Descrição" required>
-              <input id="valorPagar" type="number" step="0.01" placeholder="Valor" required>
+              <input id="valorPagar" type="number" step="0.01" min="0.01" placeholder="Valor" required>
               <input id="dataPagar" type="date" required>
               <select id="catPagar"><option>Fornecedores</option><option>Aluguel</option><option>Salários</option><option>Outros</option></select>
               <button type="submit">Adicionar</button>
@@ -188,6 +194,7 @@
     var chartPeriodo = 'semanal';
     var monitorInterval = null;
     var timerIntervals = {};
+    var PRODUTOS = ['Açaí 500ml','Barca de Açaí','Suco de Cupuaçu','Açaí 300ml','Tigela Fit','Smoothie Banana','Cupuaçu com Granola'];
     var state = { pedidos: [], contas: [], funcionarios: [], transacoes: [], desp: 0, fat: 0, ped: 0 };
 
     /* ========== UTILS ========== */
@@ -201,6 +208,23 @@
       var h = Math.floor(m / 60);
       if (h < 24) return 'há ' + h + 'h';
       return 'há ' + Math.floor(h / 24) + 'd';
+    }
+
+    /* ========== BEEP SONORO (novo pedido) ========== */
+    function beepNovoPedido() {
+      try {
+        var ac = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = ac.createOscillator();
+        var gain = ac.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 880;
+        gain.gain.value = 0.15;
+        osc.connect(gain);
+        gain.connect(ac.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.3);
+        osc.stop(ac.currentTime + 0.3);
+      } catch(e) { /* silently fail if AudioContext unavailable */ }
     }
 
     /* ========== TOAST ========== */
@@ -322,6 +346,7 @@
       renderPedidos();
       renderUltimosPedidos();
       renderVendasRecentes();
+      renderTopProdutos();
       renderFinanceiro();
       renderEquipe();
       renderChart();
@@ -333,15 +358,17 @@
       var nomes = ['Ana','Bruno','Carla','Diego','Eva','Felipe','Gabi','Hugo','Isabela','João'];
       var nome = nomes[Math.floor(Math.random() * nomes.length)];
       var valor = parseFloat((Math.random() * 40 + 10).toFixed(2));
+      var produto = PRODUTOS[Math.floor(Math.random() * PRODUTOS.length)];
       var pedido = {
-        id: Date.now(), canal: canal, nome: nome, valor: valor,
+        id: Date.now(), canal: canal, nome: nome, valor: valor, produto: produto,
         status: 'Pendente', criadoEm: new Date().toISOString(), timerEnd: null
       };
       state.pedidos.push(pedido);
       state.ped++;
       state.fat += valor;
       state.transacoes.push({ tipo: 'entrada', valor: valor, data: new Date().toISOString() });
-      toast('Pedido ' + canal + ' de ' + nome + ' registrado!', 'success');
+      beepNovoPedido();
+      toast('Pedido ' + canal + ' de ' + nome + ' (' + produto + ')', 'success');
       render();
       if (autoprint) imprimirComanda(pedido.id);
     }
@@ -531,7 +558,10 @@
       var valor = parseFloat(document.getElementById('valor' + pfx).value);
       var data = document.getElementById('data' + pfx).value;
       var cat = document.getElementById('cat' + pfx).value;
-      if (!desc || isNaN(valor) || !data || !cat) return false;
+      if (!desc || isNaN(valor) || valor <= 0 || !data || !cat) {
+        toast('Preencha todos os campos com valores válidos (valor > 0)', 'error');
+        return false;
+      }
       state.contas.push({ desc: desc, valor: valor, tipo: tipo, data: data, categoria: cat });
       if (tipo === 'pagar') state.desp += valor;
       if (tipo === 'receber') state.fat += valor;
@@ -583,7 +613,10 @@
       e.preventDefault();
       var nome = document.getElementById('nomeFunc').value.trim();
       var cargo = document.getElementById('cargoFunc').value.trim();
-      if (!nome || !cargo) return false;
+      if (!nome || !cargo) {
+        toast('Nome e cargo são obrigatórios', 'error');
+        return false;
+      }
       state.funcionarios.push({ nome: nome, cargo: cargo, status: 'Ativo' });
       e.target.reset();
       toast(nome + ' adicionado à equipe', 'success');
@@ -603,6 +636,55 @@
           '<td class="' + (f.status === 'Ativo' ? 'ativo' : 'inativo') + '">' + f.status + '</td>' +
           '<td><button onclick="removerFuncionario(' + i + ')">Remover</button></td></tr>';
       }).join('') : '<tr><td colspan="4" style="color:#8E8E93;text-align:center;padding:24px">Nenhum funcionário.</td></tr>';
+    }
+
+    /* ========== TOP 3 PRODUTOS ========== */
+    function renderTopProdutos() {
+      var count = {};
+      state.pedidos.forEach(function(p) {
+        var prod = p.produto || 'Açaí 500ml';
+        count[prod] = (count[prod] || 0) + 1;
+      });
+      var sorted = Object.keys(count).map(function(k) { return { nome: k, qty: count[k] }; })
+        .sort(function(a, b) { return b.qty - a.qty; }).slice(0, 3);
+      var el = document.getElementById('topProdutosList');
+      if (!el) return;
+      var max = sorted.length ? sorted[0].qty : 1;
+      el.innerHTML = sorted.length ? sorted.map(function(item, i) {
+        var pct = Math.round((item.qty / max) * 100);
+        return '<div class="top-produto-item">' +
+          '<div class="top-produto-rank">' + (i + 1) + 'º</div>' +
+          '<div class="top-produto-info">' +
+            '<div class="top-produto-name">' + esc(item.nome) + '</div>' +
+            '<div class="top-produto-bar-wrap"><div class="top-produto-bar" style="width:' + pct + '%"></div></div>' +
+          '</div>' +
+          '<div class="top-produto-qty">' + item.qty + '</div>' +
+        '</div>';
+      }).join('') : '<p style="color:#8E8E93;font-size:0.85rem">Nenhum pedido ainda.</p>';
+    }
+
+    /* ========== EXPORTAR CSV ========== */
+    function exportarCSV() {
+      var rows = [['Tipo','Descri\u00e7\u00e3o','Valor','Data','Categoria']];
+      state.contas.forEach(function(c) {
+        if (matchFiltro(c.data)) {
+          rows.push([c.tipo === 'receber' ? 'Receita' : 'Despesa', c.desc, c.valor.toFixed(2), c.data, c.categoria]);
+        }
+      });
+      state.transacoes.forEach(function(t) {
+        if (matchFiltro(t.data)) {
+          rows.push([t.tipo === 'entrada' ? 'Venda' : 'Saida', 'Pedido', t.valor.toFixed(2), t.data.substring(0, 10), '-']);
+        }
+      });
+      var csv = rows.map(function(r) { return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(';'); }).join('\n');
+      var bom = '\uFEFF';
+      var blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'good-acai-relatorio-' + new Date().toISOString().substring(0, 10) + '.csv';
+      link.click();
+      URL.revokeObjectURL(link.href);
+      toast('Relat\u00f3rio CSV exportado com sucesso!', 'success');
     }
 
     /* ========== CHART PERIODO ========== */
