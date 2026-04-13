@@ -193,6 +193,44 @@ html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sa
 .top-produto-qty{font-weight:700;font-size:0.85rem;color:var(--gray-light);flex-shrink:0;min-width:28px;text-align:right}
 
 /* ============================================================
+   ALERTAS URGENTES (Dashboard)
+   ============================================================ */
+.alertas-urgentes{
+  background:var(--gray-bg);border-left:4px solid var(--accent);
+  border-radius:0 14px 14px 0;padding:16px 20px;margin-bottom:24px;
+}
+.alertas-header{
+  font-family:'DM Serif Display',serif;font-size:1rem;color:var(--dark);
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.alertas-icon{font-size:1.1rem;color:var(--accent-dark)}
+.alerta-item{
+  display:flex;align-items:center;gap:12px;padding:8px 0;
+  border-bottom:1px solid var(--border);font-size:0.88rem;
+}
+.alerta-item:last-child{border-bottom:none}
+.alerta-label{
+  background:var(--accent);color:var(--dark);font-weight:700;font-size:0.72rem;
+  padding:3px 8px;border-radius:6px;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px;
+}
+.alerta-desc{flex:1;font-weight:600;color:var(--dark)}
+.alerta-valor{font-weight:700;color:var(--red)}
+
+/* -- Profile badge (bolinha amarela) -- */
+.profile-avatar{position:relative}
+.profile-badge{
+  display:none;position:absolute;top:-2px;right:-2px;
+  width:12px;height:12px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--card);
+  animation:badgePulse 2s infinite;
+}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,0.5)}50%{box-shadow:0 0 0 4px rgba(255,215,0,0)}}
+
+/* -- Conta urgente (Financeiro) -- */
+.caixa-card.conta-urgente{border-left-color:var(--accent)!important;background:rgba(255,215,0,0.04)}
+.conta-urgente-icon{color:var(--accent-dark);font-size:0.9rem;margin-left:6px}
+
+/* ============================================================
    EXPORTAR CSV BUTTON
    ============================================================ */
 .btn-exportar{

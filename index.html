@@ -13,7 +13,7 @@
     <!-- ============ SIDEBAR ============ -->
     <aside class="sidebar">
       <div class="profile-card" id="profileCard" onclick="toggleProfileMenu()">
-        <div class="profile-avatar">P</div>
+        <div class="profile-avatar">P<span class="profile-badge" id="profileBadge"></span></div>
         <div class="profile-info">
           <span class="profile-name">Pedro</span>
           <span class="profile-role" id="profileRoleLabel">Proprietário</span>
@@ -37,6 +37,7 @@
     <main class="main-content">
       <!-- ===== DASHBOARD ===== -->
       <section id="dashboard" class="active">
+        <div class="alertas-urgentes" id="alertasUrgentes" style="display:none"></div>
         <h2 class="section-title">Dashboard</h2>
         <div class="kpi-row">
           <div class="kpi-card" id="kpiFat" data-role="dono">
@@ -347,6 +348,7 @@
       renderUltimosPedidos();
       renderVendasRecentes();
       renderTopProdutos();
+      renderAlertas();
       renderFinanceiro();
       renderEquipe();
       renderChart();
@@ -527,6 +529,50 @@
       toast('Comanda enviada para impressão', 'info');
     }
 
+    /* ========== ALERTAS URGENTES (contas a vencer) ========== */
+    function getContasVencendo() {
+      var now = new Date();
+      var hoje = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var limite = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+      var urgentes = [];
+      state.contas.forEach(function(c, i) {
+        if (c.tipo !== 'pagar') return;
+        var parts = c.data.split('-');
+        var dv = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        if (dv >= hoje && dv <= limite) {
+          var label = dv.toDateString() === hoje.toDateString() ? 'Vence HOJE' : 'Vence amanhã';
+          urgentes.push({ desc: c.desc, valor: c.valor, label: label, idx: i });
+        }
+      });
+      return urgentes;
+    }
+    function renderAlertas() {
+      var el = document.getElementById('alertasUrgentes');
+      if (!el) return;
+      var urgentes = getContasVencendo();
+      /* Badge no perfil do Pedro */
+      var badge = document.getElementById('profileBadge');
+      if (badge) badge.style.display = urgentes.length ? 'block' : 'none';
+      if (!urgentes.length) { el.style.display = 'none'; return; }
+      el.style.display = 'block';
+      el.innerHTML = '<div class="alertas-header"><span class="alertas-icon">⚠</span> Alertas Urgentes</div>' +
+        urgentes.map(function(u) {
+          return '<div class="alerta-item">' +
+            '<span class="alerta-label">' + esc(u.label) + '</span>' +
+            '<span class="alerta-desc">' + esc(u.desc) + '</span>' +
+            '<span class="alerta-valor">' + fmt(u.valor) + '</span>' +
+          '</div>';
+        }).join('');
+    }
+    function isContaUrgente(data) {
+      var now = new Date();
+      var hoje = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var limite = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+      var parts = data.split('-');
+      var dv = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      return dv >= hoje && dv <= limite;
+    }
+
     /* ========== FINANCEIRO ========== */
     function setFiltroData(f) {
       filtroData = f;
@@ -599,8 +645,9 @@
       }).join('') : '<p style="color:#8E8E93">Nenhuma conta a receber.</p>';
       document.getElementById('listaPagar').innerHTML = pagar.length ? pagar.map(function(item) {
         var c = item.c;
-        return '<div class="caixa-card saida">' +
-          '<span class="caixa-desc">' + esc(c.desc) + '</span>' +
+        var urgFlag = (c.tipo === 'pagar' && isContaUrgente(c.data)) ? '<span class="conta-urgente-icon" title="Vencendo em breve">⚠</span>' : '';
+        return '<div class="caixa-card saida' + (urgFlag ? ' conta-urgente' : '') + '">' +
+          '<span class="caixa-desc">' + esc(c.desc) + urgFlag + '</span>' +
           '<span class="caixa-valor">' + fmt(c.valor) + '</span>' +
           '<span class="caixa-date">' + c.data + '</span>' +
           '<span class="caixa-cat">' + esc(c.categoria) + '</span>' +
