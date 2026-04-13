@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Comanda - GOOD AÇAÍ - Teste de Impressão</title>
+<style>
+  @page { size: 80mm auto; margin: 4mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', monospace;
+    width: 280px;
+    margin: 0 auto;
+    padding: 16px;
+    font-size: 13px;
+    color: #000;
+    background: #fff;
+  }
+  .center { text-align: center; }
+  .bold { font-weight: bold; }
+  .big { font-size: 20px; }
+  .med { font-size: 15px; }
+  .line { border-bottom: 1px dashed #000; margin: 10px 0; }
+  .double-line { border-bottom: 2px solid #000; margin: 10px 0; }
+  .row { display: flex; justify-content: space-between; padding: 3px 0; }
+  .item { padding: 4px 0; }
+  .total-box { background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 8px 0; }
+  .logo { font-size: 24px; letter-spacing: 2px; }
+  .sub { font-size: 11px; color: #666; margin-top: 2px; }
+  .badge { display: inline-block; background: #FFD700; color: #000; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-top: 6px; }
+  .footer { font-size: 10px; color: #888; margin-top: 12px; }
+  @media screen {
+    body { border: 1px solid #ccc; margin-top: 40px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .no-print { display: block; position: fixed; top: 0; left: 0; right: 0; background: #1A1A1A; color: #FFD700; text-align: center; padding: 10px; font-family: sans-serif; font-size: 14px; z-index: 999; }
+  }
+  @media print { .no-print { display: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="no-print">
+  ⬇ Use <strong>Ctrl+P</strong> → Destino: <strong>"Salvar como PDF"</strong> → Salvar
+</div>
+
+<!-- ========== CABEÇALHO ========== -->
+<div class="center">
+  <div class="logo bold">GOOD AÇAÍ</div>
+  <div class="sub">Açaí Premium & Delivery</div>
+  <div class="sub">CNPJ: 00.000.000/0001-00</div>
+</div>
+
+<div class="double-line"></div>
+
+<div class="center bold med">COMANDA DE PEDIDO</div>
+<div class="center"><span class="badge">iFood</span></div>
+
+<div class="line"></div>
+
+<!-- ========== DADOS DO PEDIDO ========== -->
+<div class="row"><span class="bold">Pedido:</span><span>#20260413001</span></div>
+<div class="row"><span class="bold">Canal:</span><span>iFood</span></div>
+<div class="row"><span class="bold">Cliente:</span><span>Ana Silva</span></div>
+<div class="row"><span class="bold">Status:</span><span>Em Preparo</span></div>
+
+<div class="line"></div>
+
+<!-- ========== ITENS ========== -->
+<div class="bold" style="margin-bottom:6px">ITENS:</div>
+
+<div class="item">
+  <div class="row">
+    <span>1x Açaí 500ml</span>
+    <span>R$ 22,90</span>
+  </div>
+  <div style="font-size:11px;color:#666;padding-left:16px">+ Granola, Banana, Leite Ninho</div>
+</div>
+
+<div class="item">
+  <div class="row">
+    <span>1x Barca Good Açaí</span>
+    <span>R$ 45,00</span>
+  </div>
+  <div style="font-size:11px;color:#666;padding-left:16px">+ Morango, Nutella, Paçoca</div>
+</div>
+
+<div class="item">
+  <div class="row">
+    <span>1x Suco de Cupuaçu</span>
+    <span>R$ 12,00</span>
+  </div>
+</div>
+
+<div class="line"></div>
+
+<!-- ========== TOTAIS ========== -->
+<div class="total-box">
+  <div class="row"><span>Subtotal:</span><span>R$ 79,90</span></div>
+  <div class="row"><span>Taxa de entrega:</span><span>R$ 5,99</span></div>
+  <div class="row"><span>Desconto:</span><span style="color:green">- R$ 5,00</span></div>
+  <div class="line"></div>
+  <div class="row bold big">
+    <span>TOTAL:</span>
+    <span>R$ 80,89</span>
+  </div>
+</div>
+
+<div class="line"></div>
+
+<!-- ========== PAGAMENTO ========== -->
+<div class="row"><span class="bold">Pagamento:</span><span>Cartão (App)</span></div>
+<div class="row"><span class="bold">Entrega:</span><span>30-45 min</span></div>
+
+<div class="line"></div>
+
+<!-- ========== ENDEREÇO ========== -->
+<div class="bold" style="margin-bottom:4px">ENDEREÇO:</div>
+<div style="font-size:12px">Rua das Flores, 123 - Centro<br>Goiânia - GO | CEP 74000-000</div>
+
+<div class="double-line"></div>
+
+<!-- ========== RODAPÉ ========== -->
+<div class="center footer">
+  <div id="dataHora"></div>
+  <div style="margin-top:4px">*** GOOD AÇAÍ - Obrigado! ***</div>
+  <div>Volte sempre 💛</div>
+</div>
+
+<script>
+  document.getElementById('dataHora').textContent = new Date().toLocaleString('pt-BR');
+</script>
+
+</body>
+</html>

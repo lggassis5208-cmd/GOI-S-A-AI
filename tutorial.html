@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial - GOOD AÇAÍ ERP</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root { --accent:#FFD700; --dark:#1A1A1A; --green:#008000; --red:#DC143C; --bg:#F9F9F9; --card:#fff; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--dark); line-height:1.7; }
+
+  /* Header */
+  .header {
+    background:var(--dark); color:var(--accent); text-align:center; padding:48px 24px 36px;
+    position:relative; overflow:hidden;
+  }
+  .header::after { content:''; position:absolute; bottom:0; left:0; right:0; height:4px; background:var(--accent); }
+  .header h1 { font-family:'DM Serif Display',serif; font-size:2.5rem; letter-spacing:1px; }
+  .header p { color:#ccc; font-size:1rem; margin-top:8px; }
+  .header .badge { display:inline-block; background:var(--accent); color:var(--dark); padding:4px 16px; border-radius:20px; font-size:0.8rem; font-weight:700; margin-top:12px; }
+
+  /* Container */
+  .container { max-width:900px; margin:0 auto; padding:32px 24px 80px; }
+
+  /* TOC */
+  .toc {
+    background:var(--card); border-radius:16px; padding:28px 32px; margin-bottom:40px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.06);
+  }
+  .toc h2 { font-family:'DM Serif Display',serif; font-size:1.3rem; margin-bottom:16px; }
+  .toc ol { padding-left:20px; }
+  .toc li { margin-bottom:8px; }
+  .toc a { color:var(--dark); text-decoration:none; font-weight:500; transition:color 0.2s; }
+  .toc a:hover { color:var(--accent); text-decoration:underline; }
+
+  /* Sections */
+  .section {
+    background:var(--card); border-radius:16px; padding:32px; margin-bottom:28px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.06);
+  }
+  .section h2 {
+    font-family:'DM Serif Display',serif; font-size:1.5rem; color:var(--dark);
+    margin-bottom:20px; padding-bottom:12px; border-bottom:2px solid var(--accent);
+    display:flex; align-items:center; gap:12px;
+  }
+  .section h2 .num {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:36px; height:36px; background:var(--dark); color:var(--accent);
+    border-radius:50%; font-size:0.9rem; font-weight:700; flex-shrink:0;
+  }
+  .section h3 { font-size:1.05rem; margin:20px 0 8px; color:#333; }
+  .section p { margin-bottom:12px; color:#444; }
+  .section ul, .section ol { padding-left:20px; margin-bottom:16px; }
+  .section li { margin-bottom:6px; color:#444; }
+
+  /* Highlights */
+  .highlight {
+    background:rgba(255,215,0,0.08); border-left:4px solid var(--accent);
+    padding:14px 18px; border-radius:0 12px 12px 0; margin:16px 0; font-size:0.92rem;
+  }
+  .highlight strong { color:var(--dark); }
+  .tip {
+    background:rgba(0,128,0,0.06); border-left:4px solid var(--green);
+    padding:14px 18px; border-radius:0 12px 12px 0; margin:16px 0; font-size:0.92rem;
+  }
+  .warn {
+    background:rgba(220,20,60,0.06); border-left:4px solid var(--red);
+    padding:14px 18px; border-radius:0 12px 12px 0; margin:16px 0; font-size:0.92rem;
+  }
+  code {
+    background:#f0f0f0; padding:2px 8px; border-radius:4px; font-size:0.88rem;
+    font-family:'Courier New',monospace;
+  }
+  .key { display:inline-block; background:var(--dark); color:#fff; padding:2px 10px; border-radius:6px; font-size:0.8rem; font-weight:700; margin:0 2px; }
+  .step-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0; }
+  .step-card {
+    background:var(--bg); border-radius:12px; padding:16px; border:1px solid rgba(0,0,0,0.06);
+  }
+  .step-card .emoji { font-size:1.5rem; margin-bottom:6px; }
+  .step-card strong { display:block; margin-bottom:4px; color:var(--dark); }
+  .step-card span { font-size:0.88rem; color:#666; }
+
+  /* Footer */
+  .footer { text-align:center; padding:24px; color:#999; font-size:0.85rem; }
+  .footer strong { color:var(--dark); }
+
+  /* Responsive */
+  @media(max-width:600px) {
+    .header h1 { font-size:1.8rem; }
+    .section { padding:20px; }
+    .step-grid { grid-template-columns:1fr; }
+  }
+  @media print {
+    body { background:#fff; }
+    .section { box-shadow:none; page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="header">
+  <h1>GOOD AÇAÍ ERP</h1>
+  <p>Tutorial Completo do Sistema</p>
+  <span class="badge">v2.0 — Quiet Luxury Edition</span>
+</header>
+
+<div class="container">
+
+<!-- ============ ÍNDICE ============ -->
+<div class="toc" id="top">
+  <h2>📑 Índice</h2>
+  <ol>
+    <li><a href="#visao">Visão Geral do Sistema</a></li>
+    <li><a href="#acesso">Acessando o ERP</a></li>
+    <li><a href="#perfil">Perfil e Papéis (Dono / Funcionário)</a></li>
+    <li><a href="#dashboard">Dashboard — Painel Principal</a></li>
+    <li><a href="#kpis">KPIs — Indicadores de Desempenho</a></li>
+    <li><a href="#pedidos">Gestão de Pedidos</a></li>
+    <li><a href="#financeiro">Módulo Financeiro</a></li>
+    <li><a href="#equipe">Gestão de Equipe</a></li>
+    <li><a href="#bi">Inteligência de Negócios (BI)</a></li>
+    <li><a href="#impressao">Impressão de Comandas</a></li>
+    <li><a href="#simulacao">Simulação Completa (Demo)</a></li>
+    <li><a href="#mobile">Versão Mobile</a></li>
+    <li><a href="#tecnico">Informações Técnicas</a></li>
+  </ol>
+</div>
+
+<!-- ============ 1. VISÃO GERAL ============ -->
+<div class="section" id="visao">
+  <h2><span class="num">1</span> Visão Geral do Sistema</h2>
+  <p>O <strong>GOOD AÇAÍ ERP</strong> é um sistema de gestão empresarial completo, projetado para lojas de açaí com operação de delivery (iFood, 99Food) e atendimento presencial.</p>
+
+  <div class="step-grid">
+    <div class="step-card">
+      <div class="emoji">📊</div>
+      <strong>Dashboard</strong>
+      <span>KPIs de faturamento, pedidos, despesas e lucro em tempo real</span>
+    </div>
+    <div class="step-card">
+      <div class="emoji">📦</div>
+      <strong>Pedidos</strong>
+      <span>Gestão completa: receber, preparar, entregar e concluir</span>
+    </div>
+    <div class="step-card">
+      <div class="emoji">💰</div>
+      <strong>Financeiro</strong>
+      <span>Contas a pagar/receber, filtros por período, exportação CSV</span>
+    </div>
+    <div class="step-card">
+      <div class="emoji">👥</div>
+      <strong>Equipe</strong>
+      <span>Cadastro de funcionários com status ativo/inativo</span>
+    </div>
+  </div>
+
+  <div class="highlight">
+    <strong>Design:</strong> Estilo "Quiet Luxury" com paleta Dourado (#FFD700) e Preto (#1A1A1A). Tipografia premium com DM Serif Display + DM Sans.
+  </div>
+</div>
+
+<!-- ============ 2. ACESSO ============ -->
+<div class="section" id="acesso">
+  <h2><span class="num">2</span> Acessando o ERP</h2>
+
+  <h3>Modo Desenvolvimento</h3>
+  <ol>
+    <li>Abra o terminal na pasta do projeto</li>
+    <li>Execute: <code>npm run dev</code></li>
+    <li>Acesse no navegador: <code>http://localhost:5183/</code></li>
+  </ol>
+
+  <h3>Modo Produção</h3>
+  <ol>
+    <li>Execute: <code>npm run build</code></li>
+    <li>Abra o arquivo <code>dist/index.html</code> no navegador</li>
+  </ol>
+
+  <div class="tip">
+    <strong>💡 Dica:</strong> O sistema inicia sempre com dados zerados (localStorage limpo) para segurança. Use o botão "Executar Simulação" para popular com dados de demonstração.
+  </div>
+</div>
+
+<!-- ============ 3. PERFIL ============ -->
+<div class="section" id="perfil">
+  <h2><span class="num">3</span> Perfil e Papéis</h2>
+  <p>O sistema possui dois papéis com visões diferentes:</p>
+
+  <h3>👔 Dono (Proprietário)</h3>
+  <ul>
+    <li>Acesso total: Dashboard, Pedidos, Financeiro e Equipe</li>
+    <li>Visualiza KPIs de Faturamento e Lucro</li>
+    <li>Gerencia contas a pagar/receber</li>
+    <li>Exporta relatórios CSV</li>
+  </ul>
+
+  <h3>👷 Funcionário</h3>
+  <ul>
+    <li>Acesso ao painel de <strong>Pedidos</strong> e <strong>Equipe</strong> apenas</li>
+    <li>Foco na operação: receber, preparar e despachar pedidos</li>
+    <li>Não vê dados financeiros sensíveis</li>
+  </ul>
+
+  <div class="highlight">
+    <strong>Como trocar de perfil:</strong> Clique no card do <strong>Pedro</strong> (canto superior esquerdo da sidebar) → selecione "Dashboard (Dono)" ou "Painel de Preparo (Funcionário)".
+  </div>
+
+  <p>O badge amarelo pulsante (💛) no avatar do Pedro aparece quando há <strong>contas urgentes</strong> (vencendo em 48h).</p>
+</div>
+
+<!-- ============ 4. DASHBOARD ============ -->
+<div class="section" id="dashboard">
+  <h2><span class="num">4</span> Dashboard — Painel Principal</h2>
+  <p>A tela principal exibe uma visão consolidada do negócio:</p>
+
+  <h3>Estrutura do Dashboard</h3>
+  <ol>
+    <li><strong>Alertas Urgentes</strong> — Banner amarelo no topo quando há contas vencendo em até 48h</li>
+    <li><strong>Botão "Executar Simulação"</strong> — Roda uma demo completa de 33 segundos</li>
+    <li><strong>KPI Row</strong> — 4 cards: Faturamento, Pedidos, Despesas e Lucro</li>
+    <li><strong>Gráfico Doughnut</strong> — Origem dos pedidos (iFood / 99Food / Balcão) com legenda e %</li>
+    <li><strong>Vendas Recentes</strong> — Lista lateral com últimas vendas por canal</li>
+    <li><strong>Produtos Mais Vendidos</strong> — Tabela com barras de progresso e Ticket Médio</li>
+  </ol>
+</div>
+
+<!-- ============ 5. KPIs ============ -->
+<div class="section" id="kpis">
+  <h2><span class="num">5</span> KPIs — Indicadores</h2>
+
+  <div class="step-grid">
+    <div class="step-card">
+      <div class="emoji">📈</div>
+      <strong>Faturamento</strong>
+      <span>Soma de todas as entradas (vendas + receitas)</span>
+    </div>
+    <div class="step-card">
+      <div class="emoji">📦</div>
+      <strong>Pedidos</strong>
+      <span>Total de pedidos recebidos no período</span>
+    </div>
+    <div class="step-card" style="border-left:3px solid #DC143C;">
+      <div class="emoji">📉</div>
+      <strong>Despesas (Vermelho)</strong>
+      <span>Contas a pagar + saídas. Sempre em vermelho #DC143C e negrito</span>
+    </div>
+    <div class="step-card" style="border-left:3px solid #008000;">
+      <div class="emoji">💚</div>
+      <strong>Lucro (Verde / Vermelho)</strong>
+      <span>Faturamento - Despesas. Verde #008000 se positivo (+), Vermelho se negativo (-)</span>
+    </div>
+  </div>
+
+  <div class="warn">
+    <strong>⚠ Regra fixa:</strong> Despesas são <strong>sempre vermelhas</strong>. Lucro positivo é <strong>sempre verde com sinal +</strong>. Lucro negativo é <strong>sempre vermelho com sinal -</strong>. Essas cores são travadas no CSS.
+  </div>
+</div>
+
+<!-- ============ 6. PEDIDOS ============ -->
+<div class="section" id="pedidos">
+  <h2><span class="num">6</span> Gestão de Pedidos</h2>
+
+  <h3>Criando Pedidos</h3>
+  <ul>
+    <li><strong>+ Pedido iFood</strong> — Simula pedido via iFood (ícone vermelho)</li>
+    <li><strong>+ Pedido 99Food</strong> — Simula pedido via 99Food (ícone amarelo)</li>
+    <li><strong>▶ Monitorar</strong> — Ativa monitoramento automático (pedidos a cada 30s)</li>
+  </ul>
+
+  <h3>Fluxo de Status (Kanban)</h3>
+  <p>Cada pedido passa por 4 etapas. Clique <strong>"Avançar"</strong> para mover:</p>
+  <ol>
+    <li><strong>🟡 Pendente</strong> → Pedido recebido, aguardando preparo</li>
+    <li><strong>🟠 Em Preparo</strong> → Na cozinha (timer de 15 min ativado)</li>
+    <li><strong>🔵 Saiu para Entrega</strong> → Pedido despachado</li>
+    <li><strong>🟢 Concluído</strong> → Entrega confirmada</li>
+  </ol>
+
+  <h3>Ações no Card do Pedido</h3>
+  <ul>
+    <li><strong>Avançar</strong> — Move para o próximo status</li>
+    <li><strong>🖨 Imprimir</strong> — Abre comanda para impressão/PDF</li>
+    <li><strong>🗑 Remover</strong> — Exclui o pedido</li>
+  </ul>
+
+  <div class="highlight">
+    <strong>🔔 Alerta Sonoro:</strong> Cada novo pedido emite um beep (880Hz, 300ms) via AudioContext para chamar atenção do preparador.
+  </div>
+
+  <h3>Busca de Pedidos</h3>
+  <p>Use o campo <strong>"Buscar pedido..."</strong> para filtrar por nome do cliente, canal ou produto.</p>
+
+  <h3>Tabela "Últimos Pedidos"</h3>
+  <p>Abaixo dos cards, uma tabela lista os últimos pedidos com: Cliente, Valor, Status e Data.</p>
+</div>
+
+<!-- ============ 7. FINANCEIRO ============ -->
+<div class="section" id="financeiro">
+  <h2><span class="num">7</span> Módulo Financeiro</h2>
+  <p><em>(Visível apenas para perfil <strong>Dono</strong>)</em></p>
+
+  <h3>Filtros por Período</h3>
+  <div class="step-grid">
+    <div class="step-card"><strong>Todos</strong><span>Exibe todas as contas registradas</span></div>
+    <div class="step-card"><strong>Hoje</strong><span>Apenas contas do dia atual</span></div>
+    <div class="step-card"><strong>Esta Semana</strong><span>Últimos 7 dias</span></div>
+    <div class="step-card"><strong>Este Mês</strong><span>Mês corrente</span></div>
+  </div>
+
+  <h3>Contas a Receber</h3>
+  <p>Registre receitas: descrição, valor, data e categoria (Vendas / Serviços / Outros).</p>
+
+  <h3>Contas a Pagar</h3>
+  <p>Registre despesas: descrição, valor, data e categoria (Fornecedores / Aluguel / Salários / Outros).</p>
+
+  <div class="tip">
+    <strong>📊 Contas Urgentes:</strong> Contas a pagar que vencem em até 48h recebem um ícone de ⚠ (amarelo) e borda destacada. Elas também aparecem como banner de alerta no Dashboard.
+  </div>
+
+  <h3>Exportar CSV</h3>
+  <p>Clique no botão <strong>"Exportar CSV"</strong> para baixar um relatório completo em formato .csv compatível com Excel. O arquivo respeita o filtro de período selecionado.</p>
+</div>
+
+<!-- ============ 8. EQUIPE ============ -->
+<div class="section" id="equipe">
+  <h2><span class="num">8</span> Gestão de Equipe</h2>
+  <p>Cadastre membros da equipe com nome, cargo e status.</p>
+  <ul>
+    <li><strong>Adicionar:</strong> Preencha nome e cargo → clique "Adicionar"</li>
+    <li><strong>Remover:</strong> Clique no botão "Remover" na linha do funcionário</li>
+    <li><strong>Status:</strong> Ativo (verde) ou Inativo</li>
+  </ul>
+</div>
+
+<!-- ============ 9. BI ============ -->
+<div class="section" id="bi">
+  <h2><span class="num">9</span> Inteligência de Negócios (BI)</h2>
+
+  <h3>Gráfico Doughnut — Origem dos Pedidos</h3>
+  <p>Pizza furada (cutout 70%) mostrando a distribuição de pedidos por canal:</p>
+  <ul>
+    <li>🔴 <strong>iFood</strong> — Vermelho #EA1D2C</li>
+    <li>🟡 <strong>99Food</strong> — Amarelo #FFD700</li>
+    <li>⚫ <strong>Balcão</strong> — Preto #1A1A1A</li>
+  </ul>
+  <p>Legenda com % e valor faturado por canal.</p>
+
+  <h3>Produtos Mais Vendidos (Volume)</h3>
+  <p>Card lateral com os 3 produtos-chave rastreados:</p>
+  <ol>
+    <li><strong>Açaí 500ml</strong></li>
+    <li><strong>Barca Good Açaí</strong></li>
+    <li><strong>Suco de Cupuaçu</strong></li>
+  </ol>
+  <p>Cada produto possui uma barra de progresso amarela (#FFD700) indicando o volume relativo.</p>
+
+  <h3>Ticket Médio</h3>
+  <p>Exibido no topo do card de Produtos Mais Vendidos. Calculado automaticamente:</p>
+  <div class="highlight">
+    <strong>Fórmula:</strong> Ticket Médio = Faturamento Total dos Pedidos / Quantidade de Pedidos
+  </div>
+</div>
+
+<!-- ============ 10. IMPRESSÃO ============ -->
+<div class="section" id="impressao">
+  <h2><span class="num">10</span> Impressão de Comandas</h2>
+
+  <h3>Como Imprimir</h3>
+  <ol>
+    <li>Vá em <strong>Pedidos</strong></li>
+    <li>No card do pedido, clique no botão <strong>🖨 Imprimir</strong></li>
+    <li>Um popup abre com a comanda formatada</li>
+    <li>O diálogo de impressão aparece automaticamente</li>
+    <li>Selecione a impressora (ou "Salvar como PDF" para teste)</li>
+  </ol>
+
+  <h3>Formato da Comanda</h3>
+  <ul>
+    <li>Largura: <strong>280px (80mm térmico)</strong></li>
+    <li>Fonte: Monospace para alinhamento perfeito</li>
+    <li>Conteúdo: Nome da loja, nº do pedido, canal, cliente, valor e data/hora</li>
+    <li>CSS <code>@page { size: 80mm auto }</code> para impressoras térmicas</li>
+  </ul>
+
+  <div class="tip">
+    <strong>💡 Sem impressora?</strong> No diálogo de impressão, selecione <strong>"Salvar como PDF"</strong> ou <strong>"Microsoft Print to PDF"</strong> para gerar um arquivo PDF da comanda.
+  </div>
+</div>
+
+<!-- ============ 11. SIMULAÇÃO ============ -->
+<div class="section" id="simulacao">
+  <h2><span class="num">11</span> Simulação Completa (Demo)</h2>
+  <p>O botão <strong>"▶ Executar Simulação Completa"</strong> no Dashboard roda uma demonstração de 33 segundos que exercita todo o sistema:</p>
+
+  <h3>Cronograma da Simulação</h3>
+  <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9rem">
+    <thead>
+      <tr style="background:var(--dark);color:var(--accent)">
+        <th style="padding:10px;text-align:left">Tempo</th>
+        <th style="padding:10px;text-align:left">Ação</th>
+        <th style="padding:10px;text-align:left">Detalhe</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #eee"><td style="padding:8px">2s</td><td>👥 Equipe</td><td>Cadastra Pedro, Ana e Bruno</td></tr>
+      <tr style="border-bottom:1px solid #eee;background:#fafafa"><td style="padding:8px">4s</td><td>📋 Despesas</td><td>R$ 4.500 (Fornecedor, Energia, Aluguel, Salários)</td></tr>
+      <tr style="border-bottom:1px solid #eee"><td style="padding:8px">6s–17s</td><td>📦 Pedidos</td><td>8 pedidos (iFood + 99Food) = R$ 9.000</td></tr>
+      <tr style="border-bottom:1px solid #eee;background:#fafafa"><td style="padding:8px">18s</td><td>💰 Receitas</td><td>Evento + Delivery Especial = R$ 3.000</td></tr>
+      <tr style="border-bottom:1px solid #eee"><td style="padding:8px">20s</td><td>🔄 Preparo</td><td>Todos os pedidos avançam para "Em Preparo"</td></tr>
+      <tr style="border-bottom:1px solid #eee;background:#fafafa"><td style="padding:8px">22s</td><td>🚀 Entrega</td><td>Pedidos saem para entrega</td></tr>
+      <tr style="border-bottom:1px solid #eee"><td style="padding:8px">24s</td><td>✅ Concluído</td><td>Todos os pedidos finalizados</td></tr>
+      <tr style="border-bottom:1px solid #eee;background:#fafafa"><td style="padding:8px">26s</td><td>🖨 Comanda</td><td>Imprime comanda do último pedido</td></tr>
+      <tr style="border-bottom:1px solid #eee"><td style="padding:8px">28s</td><td>📊 Dashboard</td><td>Mostra resultado final: Fat R$ 12.000</td></tr>
+      <tr style="border-bottom:1px solid #eee;background:#fafafa"><td style="padding:8px">30s</td><td>📥 CSV</td><td>Exporta relatório financeiro</td></tr>
+      <tr><td style="padding:8px">33s</td><td>🎬 Fim</td><td>Lucro + R$ 7.500 (verde)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight">
+    <strong>Resultado Final:</strong><br>
+    Faturamento: <strong>R$ 12.000,00</strong><br>
+    Despesas: <strong style="color:#DC143C">R$ 4.500,00</strong><br>
+    Lucro: <strong style="color:#008000">+ R$ 7.500,00</strong>
+  </div>
+</div>
+
+<!-- ============ 12. MOBILE ============ -->
+<div class="section" id="mobile">
+  <h2><span class="num">12</span> Versão Mobile</h2>
+  <p>O sistema é totalmente responsivo para telas menores que 768px:</p>
+
+  <ul>
+    <li><strong>Sidebar</strong> escondida → substituída por barra de navegação inferior (bottom nav)</li>
+    <li><strong>KPIs</strong> empilhados em colunas 2x2</li>
+    <li><strong>Tabelas</strong> transformadas em cards empilhados</li>
+    <li><strong>Dashboard grid</strong> em coluna única</li>
+    <li>Padding inferior de 100px para não cobrir o bottom nav</li>
+  </ul>
+
+  <div class="tip">
+    <strong>💡 Teste Mobile:</strong> No navegador, pressione <span class="key">F12</span> → clique no ícone de celular (Device Toolbar) → selecione um dispositivo como "iPhone 14" ou "Samsung Galaxy".
+  </div>
+</div>
+
+<!-- ============ 13. TÉCNICO ============ -->
+<div class="section" id="tecnico">
+  <h2><span class="num">13</span> Informações Técnicas</h2>
+
+  <h3>Stack Tecnológica</h3>
+  <ul>
+    <li><strong>Frontend:</strong> HTML5, CSS3 (Grid/Flexbox), JavaScript Vanilla</li>
+    <li><strong>Build:</strong> Vite v5.4.21</li>
+    <li><strong>Gráficos:</strong> Chart.js (CDN)</li>
+    <li><strong>Fontes:</strong> Google Fonts — DM Serif Display + DM Sans</li>
+    <li><strong>Áudio:</strong> Web Audio API (AudioContext) para beep de pedidos</li>
+    <li><strong>Armazenamento:</strong> localStorage (chave: <code>good-acai-erp-state</code>)</li>
+  </ul>
+
+  <h3>Comandos do Projeto</h3>
+  <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9rem">
+    <tr style="border-bottom:1px solid #eee"><td style="padding:8px"><code>npm run dev</code></td><td style="padding:8px">Inicia servidor de desenvolvimento</td></tr>
+    <tr style="border-bottom:1px solid #eee;background:#fafafa"><td style="padding:8px"><code>npm run build</code></td><td style="padding:8px">Gera build de produção em /dist</td></tr>
+    <tr style="border-bottom:1px solid #eee"><td style="padding:8px"><code>npm run preview</code></td><td style="padding:8px">Preview do build de produção</td></tr>
+  </table>
+
+  <h3>Estrutura de Arquivos</h3>
+  <ul>
+    <li><code>index.html</code> — Código-fonte completo (HTML + JS inline)</li>
+    <li><code>style.css</code> — Estilos CSS do tema Quiet Luxury</li>
+    <li><code>comanda-teste.html</code> — Comanda de teste para impressão/PDF</li>
+    <li><code>dist/</code> — Build de produção otimizada</li>
+    <li><code>package.json</code> — Configuração npm + Vite</li>
+  </ul>
+
+  <h3>Repositório GitHub</h3>
+  <p><code>https://github.com/lggassis5208-cmd/GOI-S-A-AI.git</code> — Branch: main</p>
+
+  <div class="warn">
+    <strong>⚠ Segurança:</strong> O sistema limpa o localStorage ao iniciar (<code>localStorage.removeItem</code>) para evitar dados de teste persistentes. Dados inseridos são mantidos apenas durante a sessão do navegador.
+  </div>
+</div>
+
+</div>
+
+<!-- ============ FOOTER ============ -->
+<div class="footer">
+  <p><strong>GOOD AÇAÍ ERP</strong> — Tutorial v2.0</p>
+  <p>Atualizado em abril de 2026</p>
+</div>
+
+</body>
+</html>
