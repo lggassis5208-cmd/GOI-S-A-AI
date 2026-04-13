@@ -350,23 +350,163 @@ html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sa
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+
+/* -- Anti-break overflow safety -- */
+.main-content{overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* -- Pedido tempo "há X min" -- */
+.pedido-tempo{font-size:0.75rem;color:var(--gray-light);margin-left:auto}
+
+/* -- Mobile bottom nav (hidden on desktop) -- */
+.mobile-nav{display:none}
+
 @media(max-width:1400px){
   .dashboard-grid{grid-template-columns:1fr}
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .caixa-section{grid-template-columns:1fr}
 }
-@media(max-width:1024px){
-  .erp-root{grid-template-columns:1fr;width:100%}
-  .sidebar{display:none}
-  .kpi-row{grid-template-columns:1fr}
+
+@media(max-width:768px){
+  /* Root: remove fixed width, full fluid */
+  .erp-root{grid-template-columns:1fr!important;width:100%!important}
+  .erp-root{zoom:1!important}
+
+  /* Hide desktop sidebar, show bottom nav */
+  .sidebar{display:none!important}
+  .mobile-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:9999;
+    background:var(--card);border-top:1px solid var(--border);
+    box-shadow:0 -4px 20px rgba(0,0,0,0.06);padding:6px 0 env(safe-area-inset-bottom,6px);
+    justify-content:space-around;align-items:center;
+  }
+  .mobile-nav-btn{
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    background:none;border:none;font-family:'DM Sans',Arial,sans-serif;
+    font-size:0.65rem;font-weight:600;color:var(--gray-light);
+    padding:6px 8px;cursor:pointer;transition:color var(--transition);
+    min-width:60px;
+  }
+  .mobile-nav-btn.active{color:var(--accent-dark)}
+  .mobile-nav-btn svg{stroke:currentColor}
+
+  /* Main content padding for bottom nav */
+  .main-content{padding-bottom:80px!important}
+  .main-content>section{padding:20px 16px!important}
+  .section-title{font-size:1.3rem;margin-bottom:20px}
+
+  /* KPI cards: stack vertically */
+  .kpi-row{grid-template-columns:1fr!important;gap:12px;margin-bottom:20px}
+  .kpi-card{padding:18px 16px;min-height:auto;flex-direction:row;align-items:center;justify-content:space-between}
+  .kpi-label{margin-bottom:0}
+  .kpi-value{font-size:1.4rem}
+
+  /* Dashboard grid: stack */
+  .dashboard-grid{grid-template-columns:1fr!important;gap:16px}
+  .graph-card{padding:16px}
+  .graph-card-bar{height:220px}
+
+  /* Chart period buttons: wrap */
+  .filtro-periodo-row{flex-wrap:wrap;gap:6px}
+  .filtro-periodo-row .filtro-btn{padding:5px 10px;font-size:0.72rem}
+
+  /* Donut: stack vertically */
+  .graph-donut-inner{flex-direction:column;align-items:center;gap:16px}
+  .graph-donut-canvas-wrap{width:160px;height:160px}
+  .graph-donut-canvas-wrap canvas{width:160px!important;height:160px!important}
+  .donut-legend-col{flex-direction:row;flex-wrap:wrap;gap:8px;justify-content:center}
+
+  /* Vendas recentes */
+  .vendas-recentes{max-height:none}
+
+  /* Pedido grid: single column */
+  .pedido-actions{flex-wrap:wrap;gap:8px}
+  .pedido-search{min-width:100%!important;order:99}
+  .pedido-btn{padding:10px 16px;font-size:0.85rem}
+  .pedido-grid{grid-template-columns:1fr!important;gap:16px}
+
+  /* ===== Tables → Cards (mobile) ===== */
+  .ultimos-table thead,
+  .equipe-table thead{display:none}
+  .ultimos-table,
+  .equipe-table{display:block;background:transparent;box-shadow:none;border:none}
+  .ultimos-table tbody,
+  .equipe-table tbody{display:flex;flex-direction:column;gap:12px}
+  .ultimos-table tr,
+  .equipe-table tr{
+    display:flex;flex-direction:column;gap:6px;
+    background:var(--card);border-radius:16px;padding:16px;
+    box-shadow:var(--shadow);border:1px solid var(--border);
+  }
+  .ultimos-table td,
+  .equipe-table td{
+    padding:0;font-size:0.88rem;display:flex;align-items:center;justify-content:space-between;
+  }
+  .ultimos-table td::before,
+  .equipe-table td::before{
+    font-weight:700;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.8px;
+    color:var(--gray-light);
+  }
+  .ultimos-table tr td:nth-child(1)::before{content:'Cliente'}
+  .ultimos-table tr td:nth-child(2)::before{content:'Valor'}
+  .ultimos-table tr td:nth-child(3)::before{content:'Status'}
+  .ultimos-table tr td:nth-child(4)::before{content:'Data'}
+  .equipe-table tr td:nth-child(1)::before{content:'Nome'}
+  .equipe-table tr td:nth-child(2)::before{content:'Cargo'}
+  .equipe-table tr td:nth-child(3)::before{content:'Status'}
+  .equipe-table tr td:nth-child(4)::before{content:'Ação'}
+
+  /* Financeiro caixa */
+  .caixa-section{grid-template-columns:1fr!important;gap:16px}
+  .caixa-form{flex-direction:column}
+  .caixa-form input,.caixa-form select{width:100%}
+  .filtro-data-row{flex-wrap:wrap;gap:8px}
+
+  /* Equipe form */
+  .equipe-form{flex-direction:column;gap:10px}
+  .equipe-form input,.equipe-form button{width:100%}
+
+  /* Profile dropdown */
+  .graph-title{font-size:0.95rem}
 }
 
 /* ============================================================
-   PRINT
+   PRINT – 80mm Thermal Comanda
    ============================================================ */
 @media print{
-  .sidebar,.toast-container,.pedido-actions,.filtro-data-row,.profile-card,.profile-dropdown{display:none!important}
-  .erp-root{display:block!important;width:100%!important}
-  .main-content{padding:0!important}
-  .main-content>section{padding:16px!important}
+  /* Tudo some: sidebar, nav, toast, botões */
+  .sidebar,.mobile-nav,.toast-container,.pedido-actions,
+  .filtro-data-row,.filtro-periodo-row,.profile-card,
+  .profile-dropdown,.kpi-row,.dashboard-grid,.vendas-recentes,
+  .ultimos-section,.equipe-form,
+  .pedido-card-actions,.pedido-barra,.pedido-status-label{display:none!important}
+
+  /* Root: block, full-width, no margin */
+  .erp-root{display:block!important;width:100%!important;grid-template-columns:1fr!important}
+  .erp-root{zoom:1!important}
+  .main-content{padding:0!important;overflow:visible!important}
+  .main-content>section{padding:0!important;display:block!important}
+  .main-content>section:not(.active){display:none!important}
+
+  /* Comanda header */
+  .section-title{
+    text-align:center;font-size:18px;margin:0 0 8px;
+    font-family:'DM Serif Display',serif;
+  }
+  .section-title::before{
+    content:'GOOD AÇAÍ';display:block;
+    font-size:22px;font-weight:bold;margin-bottom:4px;
+    font-family:'DM Serif Display',serif;letter-spacing:1px;
+  }
+
+  /* Pedido cards in print: clean list */
+  .pedido-grid{display:block!important}
+  .pedido-card{
+    break-inside:avoid;border:none!important;box-shadow:none!important;
+    border-bottom:1px dashed #000!important;border-radius:0!important;
+    padding:8px 0!important;
+  }
+
+  /* Page settings for 80mm thermal */
+  @page{size:80mm auto;margin:4mm}
+  body{font-size:12px;line-height:1.4;color:#000;background:#fff}
 }

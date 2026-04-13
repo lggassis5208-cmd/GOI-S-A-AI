@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>GOOD AÇAÍ ERP</title>
-  <meta name="viewport" content="width=1920, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=DM+Serif+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -155,6 +155,25 @@
       </section>
     </main>
   </div>
+  <!-- ============ MOBILE BOTTOM NAV ============ -->
+  <nav class="mobile-nav" id="mobileNav">
+    <button class="mobile-nav-btn active" data-tab="dashboard" onclick="showSection('dashboard')">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="12" y="3" width="7" height="7" rx="1"/><rect x="3" y="12" width="7" height="7" rx="1"/><rect x="12" y="12" width="7" height="7" rx="1"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="pedidos" onclick="showSection('pedidos')">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h12a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+      <span>Pedidos</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="financeiro" data-role="dono" onclick="showSection('financeiro')">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span>Financeiro</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="equipe" onclick="showSection('equipe')">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <span>Equipe</span>
+    </button>
+  </nav>
   <div id="toastContainer" class="toast-container"></div>
 
   <script>
@@ -249,14 +268,18 @@
     function adjustScale() {
       var w = window.innerWidth;
       var root = document.getElementById('erpRoot');
-      if (w < 1920) { root.style.zoom = (w / 1920); }
-      else { root.style.zoom = ''; }
+      if (w <= 768) { root.style.zoom = ''; root.style.width = '100%'; }
+      else if (w < 1920) { root.style.zoom = (w / 1920); root.style.width = '1920px'; }
+      else { root.style.zoom = ''; root.style.width = '1920px'; }
     }
     window.addEventListener('resize', adjustScale);
 
     /* ========== NAVIGATION ========== */
     function showSection(id) {
       document.querySelectorAll('.sidebar-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.tab === id);
+      });
+      document.querySelectorAll('.mobile-nav-btn').forEach(function(b) {
         b.classList.toggle('active', b.dataset.tab === id);
       });
       document.querySelectorAll('.main-content > section').forEach(function(s) {
@@ -270,16 +293,31 @@
       b.addEventListener('click', function() { showSection(b.dataset.tab); });
     });
 
+    /* ========== KPI FILTER-AWARE ========== */
+    function calcKPIs() {
+      var fat = 0, desp = 0, ped = 0;
+      state.transacoes.forEach(function(t) {
+        if (!matchFiltro(t.data)) return;
+        if (t.tipo === 'entrada') { fat += t.valor; ped++; }
+        else { desp += t.valor; }
+      });
+      state.contas.forEach(function(c) {
+        if (!matchFiltro(c.data)) return;
+        if (c.tipo === 'pagar') desp += c.valor;
+      });
+      return { fat: fat, desp: desp, ped: ped, lucro: fat - desp };
+    }
+
     /* ========== MAIN RENDER ========== */
     function render() {
       save();
-      var lucro = state.fat - state.desp;
-      document.querySelector('#kpiFat .kpi-value').textContent = fmt(state.fat);
-      document.querySelector('#kpiPed .kpi-value').textContent = state.ped;
-      document.querySelector('#kpiDesp .kpi-value').textContent = fmt(state.desp);
-      document.querySelector('#kpiLucro .kpi-value').textContent = fmt(lucro);
+      var kpi = calcKPIs();
+      document.querySelector('#kpiFat .kpi-value').textContent = fmt(kpi.fat);
+      document.querySelector('#kpiPed .kpi-value').textContent = kpi.ped;
+      document.querySelector('#kpiDesp .kpi-value').textContent = fmt(kpi.desp);
+      document.querySelector('#kpiLucro .kpi-value').textContent = fmt(kpi.lucro);
       var lc = document.getElementById('kpiLucro');
-      lc.className = 'kpi-card lucro' + (lucro < 0 ? ' negativo' : '');
+      lc.className = 'kpi-card lucro' + (kpi.lucro < 0 ? ' negativo' : '');
       lc.setAttribute('data-role', 'dono');
       renderPedidos();
       renderUltimosPedidos();
@@ -383,8 +421,9 @@
         var bars = steps.map(function(_, i) { return '<div class="pedido-bar' + (i <= idx ? ' ativo' : '') + '"></div>'; }).join('');
         var ic = p.canal === 'iFood' ? 'ifood' : 'n99';
         var timer = (p.status === 'Em Preparo' && p.timerEnd) ? '<div class="pedido-timer" id="timer-' + p.id + '">--:--</div>' : '';
+        var ago = p.criadoEm ? '<div class="pedido-tempo">' + timeAgo(p.criadoEm) + '</div>' : '';
         return '<div class="pedido-card ' + (cls[p.status] || '') + '">' +
-          '<div class="pedido-card-top"><span class="pedido-icone ' + ic + '"></span><span class="pedido-id">#' + p.id + '</span></div>' +
+          '<div class="pedido-card-top"><span class="pedido-icone ' + ic + '"></span><span class="pedido-id">#' + p.id + '</span>' + ago + '</div>' +
           '<div class="pedido-nome">' + esc(p.nome) + '</div>' +
           '<div class="pedido-valor">' + fmt(p.valor) + '</div>' +
           timer +
@@ -464,10 +503,10 @@
     /* ========== FINANCEIRO ========== */
     function setFiltroData(f) {
       filtroData = f;
-      document.querySelectorAll('.filtro-btn').forEach(function(b) {
+      document.querySelectorAll('.filtro-data-row .filtro-btn').forEach(function(b) {
         b.classList.toggle('active', b.getAttribute('data-filtro') === f);
       });
-      renderFinanceiro();
+      render();
     }
     function matchFiltro(dataStr) {
       if (filtroData === 'todos') return true;
