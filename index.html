@@ -341,7 +341,7 @@
       document.querySelector('#kpiFat .kpi-value').textContent = fmt(kpi.fat);
       document.querySelector('#kpiPed .kpi-value').textContent = kpi.ped;
       document.querySelector('#kpiDesp .kpi-value').textContent = fmt(kpi.desp);
-      document.querySelector('#kpiLucro .kpi-value').textContent = fmt(kpi.lucro);
+      document.querySelector('#kpiLucro .kpi-value').textContent = (kpi.lucro >= 0 ? '+ ' : '- ') + fmt(Math.abs(kpi.lucro));
       var lc = document.getElementById('kpiLucro');
       lc.className = 'kpi-card' + (kpi.lucro >= 0 ? ' lucro' : ' negativo');
       lc.setAttribute('data-role', 'dono');
