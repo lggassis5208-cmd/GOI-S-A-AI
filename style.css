@@ -20,6 +20,55 @@
   --transition:0.3s cubic-bezier(.4,0,.2,1);
 }
 
+/* ============================================================
+   LOGIN SCREEN
+   ============================================================ */
+.login-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;z-index:100000;
+  background:linear-gradient(135deg,#1A1A1A 0%,#2C2C2C 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Sans',Arial,sans-serif;
+}
+.login-card{
+  background:#fff;border-radius:28px;padding:48px 40px 40px;
+  width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  text-align:center;
+}
+.login-brand{
+  font-family:'DM Serif Display',serif;font-size:2.2rem;font-style:italic;
+  color:#1A1A1A;letter-spacing:-0.5px;margin-bottom:4px;
+}
+.login-subtitle{font-size:0.88rem;color:#8E8E93;margin:0 0 32px 0}
+.login-form{display:flex;flex-direction:column;gap:18px;text-align:left}
+.login-field{display:flex;flex-direction:column;gap:6px}
+.login-field label{
+  font-size:0.75rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:1px;color:#8E8E93;
+}
+.login-field input{
+  font-family:'DM Sans',Arial,sans-serif;font-size:1rem;
+  border:2px solid rgba(0,0,0,0.08);border-radius:14px;
+  padding:14px 18px;background:#F5F5F5;transition:border 0.3s;
+}
+.login-field input:focus{border-color:#FFD700;outline:none;background:#fff}
+.login-error{
+  display:none;color:#DC143C;font-size:0.85rem;font-weight:600;
+  text-align:center;padding:8px;background:rgba(220,20,60,0.06);
+  border-radius:10px;
+}
+.login-btn{
+  background:#1A1A1A;color:#FFD700;border:none;border-radius:14px;
+  padding:16px;font-size:1rem;font-weight:700;cursor:pointer;
+  font-family:'DM Sans',Arial,sans-serif;transition:all 0.3s;
+  margin-top:6px;
+}
+.login-btn:hover{background:#FFD700;color:#1A1A1A}
+.login-footer{font-size:0.75rem;color:#C7C7CC;margin:24px 0 0 0}
+@media(max-width:480px){
+  .login-card{margin:16px;padding:32px 24px 28px;border-radius:20px}
+  .login-brand{font-size:1.8rem}
+}
+
 /* ===== RESET ===== */
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sans-serif;color:var(--dark);overflow-x:hidden}

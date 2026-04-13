@@ -9,7 +9,27 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="erp-root" id="erpRoot">
+  <!-- ============ LOGIN SCREEN ============ -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="login-brand">GOOD AÇAÍ</div>
+      <p class="login-subtitle">Sistema de Gestão</p>
+      <form class="login-form" id="loginForm" onsubmit="return handleLogin(event)">
+        <div class="login-field">
+          <label for="loginUser">Usuário</label>
+          <input type="text" id="loginUser" placeholder="Digite seu usuário" autocomplete="username" required>
+        </div>
+        <div class="login-field">
+          <label for="loginPass">Senha</label>
+          <input type="password" id="loginPass" placeholder="Digite sua senha" autocomplete="current-password" required>
+        </div>
+        <div class="login-error" id="loginError"></div>
+        <button type="submit" class="login-btn">Entrar</button>
+      </form>
+      <p class="login-footer">GOOD AÇAÍ ERP v2.0</p>
+    </div>
+  </div>
+  <div class="erp-root" id="erpRoot" style="display:none">
     <!-- ============ SIDEBAR ============ -->
     <aside class="sidebar">
       <div class="profile-card" id="profileCard" onclick="toggleProfileMenu()">
@@ -865,6 +885,30 @@
         pc.classList.remove('open');
       }
     });
+
+    /* ========== LOGIN ========== */
+    function handleLogin(e) {
+      e.preventDefault();
+      var user = document.getElementById('loginUser').value.trim();
+      var pass = document.getElementById('loginPass').value;
+      if (user === 'admin' && pass === 'admin123') {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('erpRoot').style.display = '';
+        adjustScale();
+        sessionStorage.setItem('good-acai-auth', '1');
+      } else {
+        var err = document.getElementById('loginError');
+        err.textContent = 'Usuário ou senha incorretos';
+        err.style.display = 'block';
+        document.getElementById('loginPass').value = '';
+      }
+      return false;
+    }
+    /* Auto-login se já autenticado na sessão */
+    if (sessionStorage.getItem('good-acai-auth') === '1') {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('erpRoot').style.display = '';
+    }
 
     /* ========== CONFIGURAÇÕES – INTEGRAÇÕES ========== */
     var INTEGRACOES_KEY = 'good-acai-integracoes';
