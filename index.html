@@ -61,20 +61,6 @@
         <div class="dashboard-grid">
           <div class="dashboard-charts">
             <div class="graph-card">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-                <h3 class="graph-title" id="chartFatTitle" style="margin-bottom:0">Faturamento Semanal</h3>
-                <div class="filtro-periodo-row">
-                  <button class="filtro-btn active" data-periodo="semanal" onclick="setChartPeriodo('semanal')">Semanal</button>
-                  <button class="filtro-btn" data-periodo="mensal" onclick="setChartPeriodo('mensal')">Mensal</button>
-                  <button class="filtro-btn" data-periodo="trimestral" onclick="setChartPeriodo('trimestral')">Trimestral</button>
-                  <button class="filtro-btn" data-periodo="anual" onclick="setChartPeriodo('anual')">Anual</button>
-                </div>
-              </div>
-              <div class="graph-card-bar">
-                <canvas id="chartFat"></canvas>
-              </div>
-            </div>
-            <div class="graph-card">
               <h3 class="graph-title">Origem dos Pedidos</h3>
               <div class="graph-donut-inner">
                 <div class="graph-donut-canvas-wrap">
@@ -87,9 +73,10 @@
           <div class="vendas-recentes">
             <h3 class="vendas-recentes-title">Vendas Recentes</h3>
             <div class="vendas-recentes-list" id="vendasRecentesList"></div>
-            <!-- Top 3 Produtos -->
+            <!-- Produtos Mais Vendidos (Volume) -->
             <div class="top-produtos" id="topProdutosCard">
-              <h4 class="top-produtos-title">Top 3 Produtos</h4>
+              <h4 class="top-produtos-title">Produtos Mais Vendidos (Volume)</h4>
+              <div class="ticket-medio-box" id="ticketMedioBox"></div>
               <div id="topProdutosList"></div>
             </div>
           </div>
@@ -193,10 +180,9 @@
     var STORAGE_KEY = 'good-acai-erp-state';
     var userRole = 'dono';
     var filtroData = 'todos';
-    var chartPeriodo = 'semanal';
     var monitorInterval = null;
     var timerIntervals = {};
-    var PRODUTOS = ['Açaí 500ml','Barca de Açaí','Suco de Cupuaçu','Açaí 300ml','Tigela Fit','Smoothie Banana','Cupuaçu com Granola'];
+    var PRODUTOS = ['Açaí 500ml','Barca Good Açaí','Suco de Cupuaçu','Açaí 300ml','Tigela Fit','Smoothie Banana','Cupuaçu com Granola'];
     var state = { pedidos: [], contas: [], funcionarios: [], transacoes: [], desp: 0, fat: 0, ped: 0 };
 
     /* ========== UTILS ========== */
@@ -686,19 +672,34 @@
       }).join('') : '<tr><td colspan="4" style="color:#8E8E93;text-align:center;padding:24px">Nenhum funcionário.</td></tr>';
     }
 
-    /* ========== TOP 3 PRODUTOS ========== */
+    /* ========== TOP PRODUTOS + TICKET MÉDIO ========== */
     function renderTopProdutos() {
       var count = {};
+      var revenue = {};
+      var totalValor = 0;
+      var totalPedidos = state.pedidos.length;
       state.pedidos.forEach(function(p) {
         var prod = p.produto || 'Açaí 500ml';
         count[prod] = (count[prod] || 0) + 1;
+        revenue[prod] = (revenue[prod] || 0) + p.valor;
+        totalValor += p.valor;
       });
-      var sorted = Object.keys(count).map(function(k) { return { nome: k, qty: count[k] }; })
-        .sort(function(a, b) { return b.qty - a.qty; }).slice(0, 3);
+      var ticketMedio = totalPedidos > 0 ? totalValor / totalPedidos : 0;
+      /* Ticket Médio */
+      var tmBox = document.getElementById('ticketMedioBox');
+      if (tmBox) {
+        tmBox.innerHTML = '<span class="ticket-medio-label">Ticket Médio</span>' +
+          '<span class="ticket-medio-value">' + fmt(ticketMedio) + '</span>';
+      }
+      /* Tabela dos 3 produtos-alvo */
+      var targetProds = ['Açaí 500ml','Barca Good Açaí','Suco de Cupuaçu'];
+      var sorted = targetProds.map(function(nome) {
+        return { nome: nome, qty: count[nome] || 0 };
+      }).sort(function(a, b) { return b.qty - a.qty; });
       var el = document.getElementById('topProdutosList');
       if (!el) return;
-      var max = sorted.length ? sorted[0].qty : 1;
-      el.innerHTML = sorted.length ? sorted.map(function(item, i) {
+      var max = Math.max(sorted[0].qty, 1);
+      el.innerHTML = sorted.map(function(item, i) {
         var pct = Math.round((item.qty / max) * 100);
         return '<div class="top-produto-item">' +
           '<div class="top-produto-rank">' + (i + 1) + 'º</div>' +
@@ -708,7 +709,7 @@
           '</div>' +
           '<div class="top-produto-qty">' + item.qty + '</div>' +
         '</div>';
-      }).join('') : '<p style="color:#8E8E93;font-size:0.85rem">Nenhum pedido ainda.</p>';
+      }).join('');
     }
 
     /* ========== EXPORTAR CSV ========== */
@@ -732,74 +733,7 @@
       link.download = 'good-acai-relatorio-' + new Date().toISOString().substring(0, 10) + '.csv';
       link.click();
       URL.revokeObjectURL(link.href);
-      toast('Relat\u00f3rio CSV exportado com sucesso!', 'success');
-    }
-
-    /* ========== CHART PERIODO ========== */
-    function setChartPeriodo(p) {
-      chartPeriodo = p;
-      document.querySelectorAll('.filtro-periodo-row .filtro-btn').forEach(function(b) {
-        b.classList.toggle('active', b.getAttribute('data-periodo') === p);
-      });
-      var titles = { semanal:'Faturamento Semanal', mensal:'Faturamento Mensal', trimestral:'Faturamento Trimestral', anual:'Faturamento Anual' };
-      var el = document.getElementById('chartFatTitle');
-      if (el) el.textContent = titles[p] || 'Faturamento';
-      renderChart();
-    }
-    function getChartData() {
-      var now = new Date();
-      if (chartPeriodo === 'semanal') {
-        var labels = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
-        var vals = [0,0,0,0,0,0,0];
-        state.transacoes.forEach(function(t) {
-          if (t.tipo === 'entrada') { var d = new Date(t.data).getDay(); vals[d === 0 ? 6 : d - 1] += t.valor; }
-        });
-        return { labels: labels, data: vals };
-      }
-      if (chartPeriodo === 'mensal') {
-        var labels = []; var vals = [];
-        for (var i = 0; i < 30; i++) {
-          var day = new Date(now); day.setDate(now.getDate() - 29 + i);
-          labels.push(day.getDate() + '/' + (day.getMonth() + 1));
-          var total = 0;
-          state.transacoes.forEach(function(t) {
-            if (t.tipo === 'entrada' && new Date(t.data).toDateString() === day.toDateString()) total += t.valor;
-          });
-          vals.push(total);
-        }
-        return { labels: labels, data: vals };
-      }
-      if (chartPeriodo === 'trimestral') {
-        var labels = []; var vals = [];
-        for (var i = 2; i >= 0; i--) {
-          var m = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          var name = m.toLocaleString('pt-BR', { month: 'short' });
-          labels.push(name);
-          var total = 0;
-          state.transacoes.forEach(function(t) {
-            var td = new Date(t.data);
-            if (t.tipo === 'entrada' && td.getMonth() === m.getMonth() && td.getFullYear() === m.getFullYear()) total += t.valor;
-          });
-          vals.push(total);
-        }
-        return { labels: labels, data: vals };
-      }
-      if (chartPeriodo === 'anual') {
-        var labels = []; var vals = [];
-        for (var i = 11; i >= 0; i--) {
-          var m = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          var name = m.toLocaleString('pt-BR', { month: 'short' });
-          labels.push(name);
-          var total = 0;
-          state.transacoes.forEach(function(t) {
-            var td = new Date(t.data);
-            if (t.tipo === 'entrada' && td.getMonth() === m.getMonth() && td.getFullYear() === m.getFullYear()) total += t.valor;
-          });
-          vals.push(total);
-        }
-        return { labels: labels, data: vals };
-      }
-      return { labels: [], data: [] };
+      toast('Relatório CSV exportado com sucesso!', 'success');
     }
 
     /* ========== CHARTS (Chart.js safety check) ========== */
@@ -815,26 +749,8 @@
         });
         return;
       }
-      var ctxBar = document.getElementById('chartFat');
       var ctxDonut = document.getElementById('chartOrigem');
-      if (!ctxBar || !ctxDonut) return;
-
-      /* Bar Chart (period-aware) */
-      var cd = getChartData();
-      if (window.fatChart) window.fatChart.destroy();
-      var grad = ctxBar.getContext('2d').createLinearGradient(0, 0, 0, 350);
-      grad.addColorStop(0, 'rgba(255,215,0,0.55)');
-      grad.addColorStop(1, 'rgba(255,215,0,0.05)');
-      window.fatChart = new Chart(ctxBar, {
-        type: 'bar',
-        data: { labels: cd.labels, datasets: [{ label: 'Faturamento', data: cd.data, backgroundColor: grad, borderColor: '#FFD700', borderWidth: 2, borderRadius: 10, maxBarThickness: 44 }] },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(ctx) { return fmt(ctx.parsed.y); } } } },
-          scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
-        }
-      });
+      if (!ctxDonut) return;
 
       /* Doughnut Chart */
       var oc = { 'iFood': 0, '99Food': 0, 'Balcão': 0 };
@@ -883,6 +799,7 @@
     });
 
     /* ========== INIT ========== */
+    localStorage.removeItem(STORAGE_KEY);
     load();
     render();
     adjustScale();
@@ -902,34 +819,52 @@
         render();
       }, 2000);
 
-      /* PASSO 2 — Despesas moderadas (4s) */
+      /* PASSO 2 — Despesas fixas = R$ 4.500 (4s) */
       setTimeout(function() {
         toast('📋 Registrando despesas do dia...', 'info');
-        state.contas.push({ desc: 'Fornecedor Polpas', valor: 320.00, tipo: 'pagar', data: hoje, categoria: 'Fornecedores' });
-        state.desp += 320;
-        state.contas.push({ desc: 'Energia Elétrica', valor: 180.00, tipo: 'pagar', data: amanha, categoria: 'Outros' });
-        state.desp += 180;
+        state.contas.push({ desc: 'Fornecedor Polpas', valor: 1800.00, tipo: 'pagar', data: hoje, categoria: 'Fornecedores' });
+        state.desp += 1800;
+        state.contas.push({ desc: 'Energia Elétrica', valor: 650.00, tipo: 'pagar', data: amanha, categoria: 'Outros' });
+        state.desp += 650;
+        state.contas.push({ desc: 'Aluguel', valor: 1200.00, tipo: 'pagar', data: hoje, categoria: 'Aluguel' });
+        state.desp += 1200;
+        state.contas.push({ desc: 'Funcionários', valor: 850.00, tipo: 'pagar', data: hoje, categoria: 'Salários' });
+        state.desp += 850;
+        state.transacoes.push({ tipo: 'saida', valor: 4500, data: new Date().toISOString() });
         render();
-        toast('⚠ Contas registradas — despesas controladas.', 'info');
+        toast('⚠ Contas registradas — R$ 4.500 em despesas.', 'info');
       }, 4000);
 
-      /* PASSO 3-8 — Muitos pedidos iFood e 99Food para faturamento alto */
-      setTimeout(function() { toast('📦 Pedidos chegando em massa...', 'info'); simularPedidoValor('iFood', 48.90); }, 6000);
-      setTimeout(function() { simularPedidoValor('iFood', 52.50); }, 7500);
-      setTimeout(function() { simularPedidoValor('99Food', 37.80); }, 9000);
-      setTimeout(function() { simularPedidoValor('iFood', 65.00); }, 10500);
-      setTimeout(function() { simularPedidoValor('99Food', 44.20); }, 12000);
-      setTimeout(function() { simularPedidoValor('iFood', 58.90); }, 13500);
-      setTimeout(function() { simularPedidoValor('iFood', 71.00); }, 15000);
-      setTimeout(function() { simularPedidoValor('99Food', 39.50); }, 16500);
+      /* PASSO 3-8 — Pedidos com valores altos p/ atingir Fat = R$ 12.000 */
+      var pedidosDemo = [
+        { canal: 'iFood', produto: 'Açaí 500ml', valor: 1200.00 },
+        { canal: 'iFood', produto: 'Barca Good Açaí', valor: 1450.00 },
+        { canal: '99Food', produto: 'Suco de Cupuaçu', valor: 980.00 },
+        { canal: 'iFood', produto: 'Açaí 500ml', valor: 1350.00 },
+        { canal: '99Food', produto: 'Barca Good Açaí', valor: 1100.00 },
+        { canal: 'iFood', produto: 'Tigela Fit', valor: 870.00 },
+        { canal: 'iFood', produto: 'Açaí 500ml', valor: 1050.00 },
+        { canal: '99Food', produto: 'Suco de Cupuaçu', valor: 1000.00 }
+      ];
+      /* Total pedidos = 9000 */
+      setTimeout(function() { toast('📦 Pedidos chegando em massa...', 'info'); simularPedidoValor(pedidosDemo[0].canal, pedidosDemo[0].valor); }, 6000);
+      setTimeout(function() { simularPedidoValor(pedidosDemo[1].canal, pedidosDemo[1].valor); }, 7500);
+      setTimeout(function() { simularPedidoValor(pedidosDemo[2].canal, pedidosDemo[2].valor); }, 9000);
+      setTimeout(function() { simularPedidoValor(pedidosDemo[3].canal, pedidosDemo[3].valor); }, 10500);
+      setTimeout(function() { simularPedidoValor(pedidosDemo[4].canal, pedidosDemo[4].valor); }, 12000);
+      setTimeout(function() { simularPedidoValor(pedidosDemo[5].canal, pedidosDemo[5].valor); }, 13500);
+      setTimeout(function() { simularPedidoValor(pedidosDemo[6].canal, pedidosDemo[6].valor); }, 15000);
+      setTimeout(function() { simularPedidoValor(pedidosDemo[7].canal, pedidosDemo[7].valor); }, 16500);
 
-      /* Receita extra via contas a receber */
+      /* Receita extra via contas a receber = 3000 (Total Fat = 12000) */
       setTimeout(function() {
         toast('💰 Registrando receitas extras...', 'info');
-        state.contas.push({ desc: 'Venda Evento Corporativo', valor: 450.00, tipo: 'receber', data: hoje, categoria: 'Vendas' });
-        state.fat += 450;
-        state.contas.push({ desc: 'Delivery Especial', valor: 280.00, tipo: 'receber', data: hoje, categoria: 'Serviços' });
-        state.fat += 280;
+        state.contas.push({ desc: 'Venda Evento Corporativo', valor: 1800.00, tipo: 'receber', data: hoje, categoria: 'Vendas' });
+        state.fat += 1800;
+        state.contas.push({ desc: 'Delivery Especial', valor: 1200.00, tipo: 'receber', data: hoje, categoria: 'Serviços' });
+        state.fat += 1200;
+        state.transacoes.push({ tipo: 'entrada', valor: 1800, data: new Date().toISOString() });
+        state.transacoes.push({ tipo: 'entrada', valor: 1200, data: new Date().toISOString() });
         render();
       }, 18000);
 
@@ -966,7 +901,7 @@
       /* PASSO 13 — Dashboard final (28s) */
       setTimeout(function() {
         showSection('dashboard');
-        toast('📊 Dashboard final — Faturamento alto, Lucro verde!', 'success');
+        toast('📊 Dashboard final — Fat R$ 12.000 | Desp R$ 4.500 | Lucro R$ 7.500!', 'success');
       }, 28000);
 
       /* PASSO 14 — Exportar CSV (30s) */
@@ -979,7 +914,7 @@
       /* FIM (33s) */
       setTimeout(function() {
         showSection('dashboard');
-        toast('🎬 Simulação finalizada! Lucro positivo, operação saudável.', 'success');
+        toast('🎬 Simulação finalizada! Lucro + R$ 7.500 — operação saudável.', 'success');
       }, 33000);
     }
 

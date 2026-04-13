@@ -114,12 +114,12 @@ html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sa
 .kpi-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-3px)}
 .kpi-label{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--gray-light);margin-bottom:12px}
 .kpi-value{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--dark);letter-spacing:-0.5px}
-.kpi-card.lucro{border-bottom:3px solid var(--green)}
-.kpi-card.lucro .kpi-value{color:var(--green)}
-.kpi-card.negativo{border-bottom:3px solid var(--red)}
-.kpi-card.negativo .kpi-value{color:var(--red)}
-.kpi-card.despesa{border-bottom:3px solid var(--red)}
-.kpi-card.despesa .kpi-value{color:var(--red)}
+.kpi-card.lucro{border-bottom:3px solid #008000}
+.kpi-card.lucro .kpi-value{color:#008000;font-weight:700}
+.kpi-card.negativo{border-bottom:3px solid #DC143C}
+.kpi-card.negativo .kpi-value{color:#DC143C;font-weight:700}
+.kpi-card.despesa{border-bottom:3px solid #DC143C}
+.kpi-card.despesa .kpi-value{color:#DC143C;font-weight:700}
 
 /* ============================================================
    DASHBOARD – 2-col: 70% graphs / 30% vendas recentes
@@ -182,8 +182,10 @@ html,body{margin:0;padding:0;background:var(--bg);font-family:'DM Sans',Arial,sa
 .top-produtos-title{
   font-family:'DM Serif Display',serif;font-size:1rem;color:var(--dark);
   margin:0 0 14px 0;font-weight:400;
-}
-.top-produto-item{display:flex;align-items:center;gap:10px;padding:8px 0}
+}/* Ticket Médio */
+.ticket-medio-box{display:flex;align-items:center;justify-content:space-between;background:var(--gray-bg);border-radius:12px;padding:12px 16px;margin-bottom:14px}
+.ticket-medio-label{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray-light)}
+.ticket-medio-value{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--dark);font-weight:700}.top-produto-item{display:flex;align-items:center;gap:10px;padding:8px 0}
 .top-produto-rank{
   font-weight:700;font-size:0.85rem;color:var(--accent-dark);
   width:28px;text-align:center;flex-shrink:0;
