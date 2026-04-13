@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=DM+Serif+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-2guyVuPR.css">
+  <link rel="stylesheet" crossorigin href="/assets/index-DBTYIxNj.css">
 </head>
 <body>
   <div class="erp-root" id="erpRoot">
@@ -31,6 +31,7 @@
         <button class="sidebar-btn" data-tab="pedidos">Pedidos</button>
         <button class="sidebar-btn" data-tab="financeiro" data-role="dono">Financeiro</button>
         <button class="sidebar-btn" data-tab="equipe">Equipe</button>
+        <button class="sidebar-btn" data-tab="configuracoes" data-role="dono">⚙ Configurações</button>
       </nav>
     </aside>
     <!-- ============ MAIN ============ -->
@@ -148,6 +149,70 @@
           <tbody id="equipeBody"></tbody>
         </table>
       </section>
+      <!-- ===== CONFIGURAÇÕES ===== -->
+      <section id="configuracoes" data-role="dono">
+        <h2 class="section-title">Configurações</h2>
+        <div class="config-grid">
+          <!-- Hub de Integrações -->
+          <div class="config-card">
+            <h3 class="config-card-title">Conectar Plataformas</h3>
+            <p class="config-card-desc">Configure as integrações com plataformas de delivery para receber pedidos automaticamente.</p>
+            <!-- iFood -->
+            <div class="integracao-bloco">
+              <div class="integracao-header">
+                <div class="integracao-logo ifood-logo">iFood</div>
+                <div class="integracao-status" id="statusIfood">
+                  <span class="status-ball desconectado"></span>
+                  <span class="status-text">Desconectado</span>
+                </div>
+              </div>
+              <div class="integracao-fields">
+                <div class="integracao-field">
+                  <label>Link de Integração / Webhook</label>
+                  <input type="url" id="webhookIfood" placeholder="https://api.ifood.com.br/webhook/..." autocomplete="off">
+                </div>
+                <div class="integracao-field">
+                  <label>Token de Acesso</label>
+                  <input type="password" id="tokenIfood" placeholder="Token de autenticação iFood" autocomplete="off">
+                </div>
+                <button class="btn-conectar" onclick="salvarIntegracao('ifood')">Salvar e Conectar</button>
+              </div>
+            </div>
+            <!-- 99Food -->
+            <div class="integracao-bloco">
+              <div class="integracao-header">
+                <div class="integracao-logo n99-logo">99Food</div>
+                <div class="integracao-status" id="status99food">
+                  <span class="status-ball desconectado"></span>
+                  <span class="status-text">Desconectado</span>
+                </div>
+              </div>
+              <div class="integracao-fields">
+                <div class="integracao-field">
+                  <label>Link de Integração / Webhook</label>
+                  <input type="url" id="webhook99food" placeholder="https://api.99food.com/webhook/..." autocomplete="off">
+                </div>
+                <div class="integracao-field">
+                  <label>Token de Acesso</label>
+                  <input type="password" id="token99food" placeholder="Token de autenticação 99Food" autocomplete="off">
+                </div>
+                <button class="btn-conectar" onclick="salvarIntegracao('99food')">Salvar e Conectar</button>
+              </div>
+            </div>
+          </div>
+          <!-- Informações do Sistema -->
+          <div class="config-card">
+            <h3 class="config-card-title">Sobre o Sistema</h3>
+            <div class="config-info-row"><span class="config-info-label">Sistema</span><span>GOOD AÇAÍ ERP</span></div>
+            <div class="config-info-row"><span class="config-info-label">Versão</span><span>2.0 — Quiet Luxury</span></div>
+            <div class="config-info-row"><span class="config-info-label">Build</span><span>Vite 5.4.21</span></div>
+            <div class="config-info-row"><span class="config-info-label">Repositório</span><span>GitHub (main)</span></div>
+            <div style="margin-top:20px">
+              <button class="btn-conectar" onclick="limparDados()" style="border-color:#DC143C;color:#DC143C">Limpar Todos os Dados</button>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
   <!-- ============ MOBILE BOTTOM NAV ============ -->
@@ -167,6 +232,10 @@
     <button class="mobile-nav-btn" data-tab="equipe" onclick="showSection('equipe')">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
       <span>Equipe</span>
+    </button>
+    <button class="mobile-nav-btn" data-tab="configuracoes" data-role="dono" onclick="showSection('configuracoes')">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Config</span>
     </button>
   </nav>
   <div id="toastContainer" class="toast-container"></div>
@@ -798,11 +867,62 @@
       }
     });
 
+    /* ========== CONFIGURAÇÕES – INTEGRAÇÕES ========== */
+    var INTEGRACOES_KEY = 'good-acai-integracoes';
+    function salvarIntegracao(plataforma) {
+      var webhookEl, tokenEl, statusEl;
+      if (plataforma === 'ifood') {
+        webhookEl = document.getElementById('webhookIfood');
+        tokenEl = document.getElementById('tokenIfood');
+        statusEl = document.getElementById('statusIfood');
+      } else {
+        webhookEl = document.getElementById('webhook99food');
+        tokenEl = document.getElementById('token99food');
+        statusEl = document.getElementById('status99food');
+      }
+      var webhook = webhookEl.value.trim();
+      var token = tokenEl.value.trim();
+      if (!webhook || !token) {
+        toast('Preencha o Webhook e o Token para conectar', 'error');
+        return;
+      }
+      /* Salvar integração */
+      var integracoes = {};
+      try { integracoes = JSON.parse(localStorage.getItem(INTEGRACOES_KEY)) || {}; } catch(e) {}
+      integracoes[plataforma] = { webhook: webhook, token: '***', conectado: true };
+      localStorage.setItem(INTEGRACOES_KEY, JSON.stringify(integracoes));
+      /* Atualizar UI */
+      statusEl.innerHTML = '<span class="status-ball conectado"></span><span class="status-text conectado">Conectado</span>';
+      toast(plataforma === 'ifood' ? 'iFood conectado com sucesso!' : '99Food conectado com sucesso!', 'success');
+    }
+    function carregarIntegracoes() {
+      try {
+        var integracoes = JSON.parse(localStorage.getItem(INTEGRACOES_KEY)) || {};
+        if (integracoes.ifood && integracoes.ifood.conectado) {
+          var s = document.getElementById('statusIfood');
+          if (s) s.innerHTML = '<span class="status-ball conectado"></span><span class="status-text conectado">Conectado</span>';
+        }
+        if (integracoes['99food'] && integracoes['99food'].conectado) {
+          var s2 = document.getElementById('status99food');
+          if (s2) s2.innerHTML = '<span class="status-ball conectado"></span><span class="status-text conectado">Conectado</span>';
+        }
+      } catch(e) {}
+    }
+    function limparDados() {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(INTEGRACOES_KEY);
+      state = { pedidos: [], contas: [], funcionarios: [], transacoes: [], desp: 0, fat: 0, ped: 0 };
+      render();
+      carregarIntegracoes();
+      toast('Todos os dados foram limpos', 'info');
+    }
+
     /* ========== INIT ========== */
     localStorage.removeItem(STORAGE_KEY);
     load();
     render();
     adjustScale();
+    carregarIntegracoes();
 
     /* ========== SIMULAÇÃO COMPLETA (demo) ========== */
     function runSimulacao() {
