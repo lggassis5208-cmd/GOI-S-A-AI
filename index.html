@@ -902,81 +902,103 @@
         render();
       }, 2000);
 
-      /* PASSO 2 — Conta a pagar vencendo HOJE (4s) */
+      /* PASSO 2 — Despesas moderadas (4s) */
       setTimeout(function() {
-        toast('📋 Registrando conta a pagar (vence hoje)...', 'info');
-        state.contas.push({ desc: 'Fornecedor Polpas', valor: 850.00, tipo: 'pagar', data: hoje, categoria: 'Fornecedores' });
-        state.desp += 850;
-        state.contas.push({ desc: 'Aluguel Loja', valor: 2200.00, tipo: 'pagar', data: amanha, categoria: 'Aluguel' });
-        state.desp += 2200;
+        toast('📋 Registrando despesas do dia...', 'info');
+        state.contas.push({ desc: 'Fornecedor Polpas', valor: 320.00, tipo: 'pagar', data: hoje, categoria: 'Fornecedores' });
+        state.desp += 320;
+        state.contas.push({ desc: 'Energia Elétrica', valor: 180.00, tipo: 'pagar', data: amanha, categoria: 'Outros' });
+        state.desp += 180;
         render();
-        toast('⚠ Contas próximas do vencimento! Veja os alertas.', 'error');
+        toast('⚠ Contas registradas — despesas controladas.', 'info');
       }, 4000);
 
-      /* PASSO 3 — Pedido iFood #1 (7s) */
-      setTimeout(function() {
-        toast('📦 Novo pedido iFood chegando...', 'info');
-        simularPedido('iFood');
-      }, 7000);
+      /* PASSO 3-8 — Muitos pedidos iFood e 99Food para faturamento alto */
+      setTimeout(function() { toast('📦 Pedidos chegando em massa...', 'info'); simularPedidoValor('iFood', 48.90); }, 6000);
+      setTimeout(function() { simularPedidoValor('iFood', 52.50); }, 7500);
+      setTimeout(function() { simularPedidoValor('99Food', 37.80); }, 9000);
+      setTimeout(function() { simularPedidoValor('iFood', 65.00); }, 10500);
+      setTimeout(function() { simularPedidoValor('99Food', 44.20); }, 12000);
+      setTimeout(function() { simularPedidoValor('iFood', 58.90); }, 13500);
+      setTimeout(function() { simularPedidoValor('iFood', 71.00); }, 15000);
+      setTimeout(function() { simularPedidoValor('99Food', 39.50); }, 16500);
 
-      /* PASSO 4 — Pedido iFood #2 (9s) */
+      /* Receita extra via contas a receber */
       setTimeout(function() {
-        simularPedido('iFood');
-      }, 9000);
+        toast('💰 Registrando receitas extras...', 'info');
+        state.contas.push({ desc: 'Venda Evento Corporativo', valor: 450.00, tipo: 'receber', data: hoje, categoria: 'Vendas' });
+        state.fat += 450;
+        state.contas.push({ desc: 'Delivery Especial', valor: 280.00, tipo: 'receber', data: hoje, categoria: 'Serviços' });
+        state.fat += 280;
+        render();
+      }, 18000);
 
-      /* PASSO 5 — Pedido 99Food (11s) */
-      setTimeout(function() {
-        simularPedido('99Food');
-      }, 11000);
-
-      /* PASSO 6 — Avançar pedidos para "Em Preparo" (14s) */
+      /* PASSO 9 — Avançar pedidos para "Em Preparo" (20s) */
       setTimeout(function() {
         toast('🔄 Avançando pedidos para preparo...', 'info');
         var pendentes = state.pedidos.filter(function(p) { return p.status === 'Pendente'; });
         pendentes.forEach(function(p) { avancarStatusPedido(p.id); });
-      }, 14000);
+      }, 20000);
 
-      /* PASSO 7 — Avançar para "Saiu para Entrega" (17s) */
+      /* PASSO 10 — Avançar para "Saiu para Entrega" (22s) */
       setTimeout(function() {
         toast('🚀 Pedidos saindo para entrega...', 'info');
         var emPreparo = state.pedidos.filter(function(p) { return p.status === 'Em Preparo'; });
         emPreparo.forEach(function(p) { avancarStatusPedido(p.id); });
-      }, 17000);
+      }, 22000);
 
-      /* PASSO 8 — Concluir primeiro pedido (19s) */
+      /* PASSO 11 — Concluir pedidos (24s) */
       setTimeout(function() {
-        toast('✅ Concluindo primeiro pedido...', 'info');
+        toast('✅ Concluindo pedidos...', 'success');
         var entrega = state.pedidos.filter(function(p) { return p.status === 'Saiu para Entrega'; });
-        if (entrega.length) avancarStatusPedido(entrega[0].id);
-      }, 19000);
+        entrega.forEach(function(p) { avancarStatusPedido(p.id); });
+      }, 24000);
 
-      /* PASSO 9 — Imprimir comanda do pedido ativo (21s) */
+      /* PASSO 12 — Imprimir comanda (26s) */
       setTimeout(function() {
-        var ativo = state.pedidos.filter(function(p) { return p.status !== 'Concluído'; });
-        if (ativo.length) {
+        var ultimo = state.pedidos[state.pedidos.length - 1];
+        if (ultimo) {
           toast('🖨 Imprimindo comanda...', 'info');
-          imprimirComanda(ativo[0].id);
+          imprimirComanda(ultimo.id);
         }
-      }, 21000);
+      }, 26000);
 
-      /* PASSO 10 — Mostrar dashboard com gráficos atualizados (23s) */
+      /* PASSO 13 — Dashboard final (28s) */
       setTimeout(function() {
         showSection('dashboard');
-        toast('📊 Dashboard atualizado — gráficos, KPIs e alertas visíveis!', 'success');
-      }, 23000);
+        toast('📊 Dashboard final — Faturamento alto, Lucro verde!', 'success');
+      }, 28000);
 
-      /* PASSO 11 — Exportar CSV (25s) */
+      /* PASSO 14 — Exportar CSV (30s) */
       setTimeout(function() {
         showSection('financeiro');
         toast('📥 Exportando relatório CSV...', 'info');
         setTimeout(function() { exportarCSV(); }, 500);
-      }, 25000);
+      }, 30000);
 
-      /* FIM (28s) */
+      /* FIM (33s) */
       setTimeout(function() {
         showSection('dashboard');
-        toast('🎬 Simulação finalizada! Todas as funcionalidades demonstradas.', 'success');
-      }, 28000);
+        toast('🎬 Simulação finalizada! Lucro positivo, operação saudável.', 'success');
+      }, 33000);
+    }
+
+    /* Simula pedido com valor definido */
+    function simularPedidoValor(canal, val) {
+      var nomes = ['Ana','Bruno','Carla','Diego','Eva','Felipe','Gabi','Hugo','Isabela','João'];
+      var nome = nomes[Math.floor(Math.random() * nomes.length)];
+      var produto = PRODUTOS[Math.floor(Math.random() * PRODUTOS.length)];
+      var pedido = {
+        id: Date.now() + Math.floor(Math.random() * 1000), canal: canal, nome: nome, valor: val, produto: produto,
+        status: 'Pendente', criadoEm: new Date().toISOString(), timerEnd: null
+      };
+      state.pedidos.push(pedido);
+      state.ped++;
+      state.fat += val;
+      state.transacoes.push({ tipo: 'entrada', valor: val, data: new Date().toISOString() });
+      beepNovoPedido();
+      toast('Pedido ' + canal + ' — ' + produto + ' ' + fmt(val), 'success');
+      render();
     }
   </script>
 </body>
