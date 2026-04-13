@@ -1,6 +1,6 @@
-# Goiás Açaí ERP
+# GOOD AÇAÍ ERP
 
-A modern, interactive ERP dashboard for Goiás Açaí with physics-based UI using Matter.js and React.
+A modern, interactive ERP dashboard for GOOD AÇAÍ with physics-based UI using Matter.js and React.
 
 ## Features
 

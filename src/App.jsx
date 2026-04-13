@@ -156,7 +156,7 @@ export default function App() {
       {/* Sidebar */}
       <aside style={{ width: 270, background: '#fff', borderRight: `1px solid ${palette.purpleLight}`, padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '3rem', minHeight: '100vh', position: 'relative' }}>
         <div>
-          <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '2.2rem', fontStyle: 'italic', fontWeight: 700, margin: 0, letterSpacing: '-1px', color: palette.purpleDeep }}>Goiás Açaí</h1>
+          <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '2.2rem', fontStyle: 'italic', fontWeight: 700, margin: 0, letterSpacing: '-1px', color: palette.purpleDeep }}>GOOD AÇAÍ</h1>
           <div style={{ color: palette.purpleLight, fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '0.2rem', textAlign: 'center' }}>ERP • GOIÂNIA</div>
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
@@ -430,7 +430,7 @@ export default function App() {
       {/* Sidebar */}
       <aside style={{ width: 270, background: '#fff', borderRight: `1px solid ${palette.purpleLight}`, padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '3rem', minHeight: '100vh' }}>
         <div>
-          <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '2.2rem', fontStyle: 'italic', fontWeight: 700, margin: 0, letterSpacing: '-1px', color: palette.purpleDeep }}>Goiás Açaí</h1>
+          <h1 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '2.2rem', fontStyle: 'italic', fontWeight: 700, margin: 0, letterSpacing: '-1px', color: palette.purpleDeep }}>GOOD AÇAÍ</h1>
           <div style={{ color: palette.purpleLight, fontSize: '0.7rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '0.2rem', textAlign: 'center' }}>ERP • GOIÂNIA</div>
         </div>
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem' }}>
