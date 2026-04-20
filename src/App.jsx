@@ -43,7 +43,7 @@ export default function App() {
   });
   const [showSenha, setShowSenha] = useState(false);
   const [senhaInput, setSenhaInput] = useState('');
-  const [activeModule, setActiveModule] = useState('pedidos');
+  const [activeModule, setActiveModule] = useState('vendas');
   const [filter, setFilter] = useState('tudo');
   const [novoFuncionario, setNovoFuncionario] = useState('');
   const [dataFechamento, setDataFechamento] = useState(new Date().toISOString().slice(0, 10));
@@ -205,6 +205,7 @@ export default function App() {
 
   const dataAtual = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   const navButtons = [
+    { id: 'vendas', label: 'Vendas', icon: '🧾' },
     { id: 'pedidos', label: 'Pedidos', icon: '🛒' },
     { id: 'financeiro', label: 'Financeiro', icon: '💸' },
     { id: 'funcionarios', label: 'Funcionários', icon: '👥' },
@@ -259,10 +260,10 @@ export default function App() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '2.5rem 3rem 1.5rem 3rem' }}>
           <div>
             <span style={{ fontFamily: 'DM Serif Display, serif', fontSize: '2.7rem', fontStyle: 'italic', fontWeight: 700, color: palette.purpleDeep, letterSpacing: '-1px' }}>
-              {activeModule === 'pedidos' ? 'Fechamento Diário' : navButtons.find(b => b.id === activeModule)?.label}
+              {navButtons.find(b => b.id === activeModule)?.label}
             </span>
           </div>
-          {activeModule === 'pedidos' && (
+          {activeModule === 'financeiro' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <button
                 onClick={abrirCaixa}
@@ -307,25 +308,6 @@ export default function App() {
 
         {activeModule === 'pedidos' && (
           <>
-            <div style={{ margin: '0 3rem 1.4rem 3rem', background: '#fff', borderRadius: 24, padding: '1.3rem 1.8rem', borderLeft: `8px solid ${saldoLiquidoDia >= 0 ? palette.emerald : palette.red}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-              <div>
-                <div style={{ fontSize: '0.8rem', color: palette.purpleLight, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Saldo Líquido do Dia</div>
-                <div style={{ fontSize: '2rem', fontWeight: 700, color: saldoLiquidoDia >= 0 ? palette.emerald : palette.red }}>{formatBRL(saldoLiquidoDia)}</div>
-                <div style={{ marginTop: '0.4rem', fontWeight: 700, color: caixaAberto ? palette.emerald : palette.red }}>
-                  Status do Caixa: {caixaAberto ? 'Aberto' : 'Fechado'}
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '1.2rem', fontWeight: 'bold', color: palette.purpleDeep }}>
-                <span>Entradas: {formatBRL(totalEntradasDia)}</span>
-                <span>Saídas: {formatBRL(totalSaidasDia)}</span>
-              </div>
-            </div>
-            {ultimoFechamento && (
-              <div style={{ margin: '0 3rem 1.2rem 3rem', background: '#fff', borderRadius: 16, padding: '0.9rem 1.1rem', border: `1px solid ${palette.purpleLight}` }}>
-                <strong>Último fechamento:</strong> {new Date(ultimoFechamento.fechadoEm).toLocaleString('pt-BR')} | Saldo Líquido: {formatBRL(ultimoFechamento.saldoLiquido)}
-              </div>
-            )}
-
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', padding: '0 3rem', marginBottom: '1.6rem' }}>
               <div style={{ background: '#fff', borderRadius: 24, padding: '1.3rem', borderBottom: `5px solid ${palette.emerald}` }}>
                 <div style={{ fontSize: '0.8rem', color: palette.purpleLight, fontWeight: 'bold', textTransform: 'uppercase' }}>Faturamento</div>
@@ -344,7 +326,38 @@ export default function App() {
                 <div style={{ fontSize: '1.6rem', fontWeight: 700 }}>{formatBRL(despesas)}</div>
               </div>
             </div>
+            <section style={{ background: '#fff', borderRadius: 24, margin: '0 3rem 2.5rem 3rem', padding: '1.2rem 1.4rem', minHeight: 250, overflowX: 'auto' }}>
+              <div style={{ fontWeight: 700, marginBottom: '0.8rem' }}>Pedidos lançados (todas as origens)</div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '0.6rem', color: palette.purpleLight }}>Tipo</th>
+                    <th style={{ textAlign: 'left', padding: '0.6rem', color: palette.purpleLight }}>Loja</th>
+                    <th style={{ textAlign: 'left', padding: '0.6rem', color: palette.purpleLight }}>Pagamento</th>
+                    <th style={{ textAlign: 'left', padding: '0.6rem', color: palette.purpleLight }}>Descrição</th>
+                    <th style={{ textAlign: 'left', padding: '0.6rem', color: palette.purpleLight }}>Valor</th>
+                    <th style={{ textAlign: 'left', padding: '0.6rem', color: palette.purpleLight }}>Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.slice(0, 20).map((t, idx) => (
+                    <tr key={idx} style={{ borderTop: '1px solid #eee' }}>
+                      <td style={{ padding: '0.65rem', fontWeight: 700, color: t.tipo === 'entrada' ? palette.emerald : palette.red }}>{t.tipo === 'entrada' ? 'Venda' : 'Compra'}</td>
+                      <td style={{ padding: '0.65rem' }}>{t.loja || '-'}</td>
+                      <td style={{ padding: '0.65rem' }}>{t.metodoPagamento || '-'}</td>
+                      <td style={{ padding: '0.65rem' }}>{t.desc}</td>
+                      <td style={{ padding: '0.65rem', color: t.tipo === 'entrada' ? palette.emerald : palette.red, fontWeight: 'bold' }}>{t.tipo === 'entrada' ? '+' : '-'} {formatBRL(Number(t.valor))}</td>
+                      <td style={{ padding: '0.65rem' }}>{new Date(t.data).toLocaleDateString('pt-BR')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          </>
+        )}
 
+        {activeModule === 'vendas' && (
+          <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(320px, 1fr))', gap: '1.2rem', margin: '0 3rem 1.8rem 3rem' }}>
               <form onSubmit={handleVendaSubmit} style={{ background: '#fff', borderRadius: 24, padding: '1.2rem', display: 'grid', gap: '0.8rem', opacity: caixaAberto ? 1 : 0.7 }}>
                 <div style={{ fontWeight: 700, color: palette.emerald }}>Lançamento Manual de Venda</div>
@@ -372,34 +385,6 @@ export default function App() {
                 <button disabled={!caixaAberto} type="submit" style={{ background: caixaAberto ? palette.red : '#ddd', color: '#fff', border: 'none', borderRadius: 14, padding: '0.85rem', fontWeight: 700, cursor: caixaAberto ? 'pointer' : 'not-allowed' }}>- Registrar Compra</button>
               </form>
             </div>
-
-            <section style={{ background: '#fff', borderRadius: 24, margin: '0 3rem 1.4rem 3rem', padding: '1.2rem 1.4rem', overflowX: 'auto' }}>
-              <div style={{ fontWeight: 700, marginBottom: '0.8rem' }}>Fechamento por Loja e Método ({dataFechamento.split('-').reverse().join('/')})</div>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'left', padding: '0.55rem', color: palette.purpleLight }}>Loja</th>
-                    {metodosPagamento.map(metodo => <th key={metodo} style={{ textAlign: 'left', padding: '0.55rem', color: palette.purpleLight }}>{metodo}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {lojas.map(loja => (
-                    <tr key={loja}>
-                      <td style={{ padding: '0.6rem', fontWeight: 700 }}>{loja}</td>
-                      {metodosPagamento.map(metodo => {
-                        const bloco = resumoLojasMetodos[loja][metodo];
-                        const saldo = bloco.entrada - bloco.saida;
-                        return (
-                          <td key={`${loja}-${metodo}`} style={{ padding: '0.6rem', color: saldo >= 0 ? palette.emerald : palette.red, fontWeight: 700 }}>
-                            {formatBRL(saldo)}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
 
             <div style={{ display: 'flex', gap: '0.7rem', margin: '0 3rem 1rem 3rem' }}>
               <button onClick={() => setFilter('tudo')} style={{ background: filter === 'tudo' ? palette.purpleVivid : '#fff', border: `1.5px solid ${palette.purpleLight}`, color: filter === 'tudo' ? '#fff' : palette.purpleLight, fontWeight: 'bold', borderRadius: 16, padding: '0.5rem 1.2rem', fontSize: '0.95rem', cursor: 'pointer' }}>Tudo</button>
@@ -439,7 +424,51 @@ export default function App() {
         {activeModule === 'financeiro' && (
           <div style={{ padding: '3rem', color: palette.purpleDeep }}>
             <h2 style={{ fontFamily: 'DM Serif Display, serif', fontSize: '2.2rem', fontStyle: 'italic', fontWeight: 700, color: palette.purpleDeep, marginBottom: '1rem' }}>Financeiro</h2>
-            <p>Fechamento operacional movido para a tela de Pedidos, com separação por loja e método de pagamento.</p>
+            <div style={{ margin: '0 0 1.4rem 0', background: '#fff', borderRadius: 24, padding: '1.3rem 1.8rem', borderLeft: `8px solid ${saldoLiquidoDia >= 0 ? palette.emerald : palette.red}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+              <div>
+                <div style={{ fontSize: '0.8rem', color: palette.purpleLight, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Saldo Líquido do Dia</div>
+                <div style={{ fontSize: '2rem', fontWeight: 700, color: saldoLiquidoDia >= 0 ? palette.emerald : palette.red }}>{formatBRL(saldoLiquidoDia)}</div>
+                <div style={{ marginTop: '0.4rem', fontWeight: 700, color: caixaAberto ? palette.emerald : palette.red }}>
+                  Status do Caixa: {caixaAberto ? 'Aberto' : 'Fechado'}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '1.2rem', fontWeight: 'bold', color: palette.purpleDeep }}>
+                <span>Entradas: {formatBRL(totalEntradasDia)}</span>
+                <span>Saídas: {formatBRL(totalSaidasDia)}</span>
+              </div>
+            </div>
+            {ultimoFechamento && (
+              <div style={{ margin: '0 0 1.2rem 0', background: '#fff', borderRadius: 16, padding: '0.9rem 1.1rem', border: `1px solid ${palette.purpleLight}` }}>
+                <strong>Último fechamento:</strong> {new Date(ultimoFechamento.fechadoEm).toLocaleString('pt-BR')} | Saldo Líquido: {formatBRL(ultimoFechamento.saldoLiquido)}
+              </div>
+            )}
+            <section style={{ background: '#fff', borderRadius: 24, padding: '1.2rem 1.4rem', overflowX: 'auto' }}>
+              <div style={{ fontWeight: 700, marginBottom: '0.8rem' }}>Fechamento por Loja e Método ({dataFechamento.split('-').reverse().join('/')})</div>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '0.55rem', color: palette.purpleLight }}>Loja</th>
+                    {metodosPagamento.map(metodo => <th key={metodo} style={{ textAlign: 'left', padding: '0.55rem', color: palette.purpleLight }}>{metodo}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {lojas.map(loja => (
+                    <tr key={loja}>
+                      <td style={{ padding: '0.6rem', fontWeight: 700 }}>{loja}</td>
+                      {metodosPagamento.map(metodo => {
+                        const bloco = resumoLojasMetodos[loja][metodo];
+                        const saldo = bloco.entrada - bloco.saida;
+                        return (
+                          <td key={`${loja}-${metodo}`} style={{ padding: '0.6rem', color: saldo >= 0 ? palette.emerald : palette.red, fontWeight: 700 }}>
+                            {formatBRL(saldo)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
           </div>
         )}
         {activeModule === 'funcionarios' && (
