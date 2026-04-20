@@ -14,7 +14,7 @@ const lojas = ['iFood Loja 1', 'iFood Loja 2', '99 Loja 1', '99 Loja 2'];
 const metodosPagamento = ['Pix', 'Dinheiro', 'Cartão'];
 
 const initialTransactions = [
-  { tipo: 'entrada', desc: 'Venda balcão', valor: 120, loja: 'iFood Loja 1', metodoPagamento: 'Pix', status: 'Confirmado', data: new Date().toISOString() },
+  { tipo: 'entrada', produto: 'Açaí 500ml', desc: 'Açaí 500ml', valor: 120, loja: 'iFood Loja 1', metodoPagamento: 'Pix', status: 'Confirmado', data: new Date().toISOString() },
   { tipo: 'saida', desc: 'Compra de copos', valor: 45, loja: '99 Loja 1', metodoPagamento: 'Dinheiro', status: 'Quitado', data: new Date().toISOString() },
 ];
 
@@ -57,10 +57,10 @@ export default function App() {
   });
 
   const [formVenda, setFormVenda] = useState({
+    produto: '',
     loja: lojas[0],
     metodoPagamento: metodosPagamento[0],
     valor: '',
-    desc: '',
   });
   const [formCompra, setFormCompra] = useState({
     loja: lojas[0],
@@ -128,6 +128,20 @@ export default function App() {
     return base;
   }, [transacoesDoDia]);
 
+  const graficoPagamentosDia = useMemo(() => {
+    const base = { Pix: 0, Dinheiro: 0, Cartão: 0 };
+    transacoesDoDia
+      .filter(item => item.tipo === 'entrada')
+      .forEach(item => {
+        if (base[item.metodoPagamento] !== undefined) {
+          base[item.metodoPagamento] += Number(item.valor);
+        }
+      });
+    return base;
+  }, [transacoesDoDia]);
+
+  const maiorValorGrafico = Math.max(...Object.values(graficoPagamentosDia), 1);
+
   let filtered = transactions;
   if (filter === 'entradas') filtered = filtered.filter(t => t.tipo === 'entrada');
   if (filter === 'saidas') filtered = filtered.filter(t => t.tipo === 'saida');
@@ -137,10 +151,12 @@ export default function App() {
     const valor = Number(payload.valor);
     if (!valor || valor <= 0) return;
 
-    const descPadrao = tipo === 'entrada' ? 'Venda manual' : 'Compra manual';
+    const produto = payload.produto?.trim() || '';
+    const descPadrao = tipo === 'entrada' ? (produto || 'Venda manual') : 'Compra manual';
     const nova = {
       tipo,
-      desc: payload.desc.trim() || descPadrao,
+      desc: (payload.desc || '').trim() || descPadrao,
+      produto: tipo === 'entrada' ? produto : '',
       valor,
       loja: payload.loja,
       metodoPagamento: payload.metodoPagamento,
@@ -155,7 +171,7 @@ export default function App() {
   function handleVendaSubmit(event) {
     event.preventDefault();
     registrarLancamento('entrada', formVenda);
-    setFormVenda(prev => ({ ...prev, valor: '', desc: '' }));
+    setFormVenda(prev => ({ ...prev, produto: '', valor: '' }));
   }
 
   function handleCompraSubmit(event) {
@@ -360,7 +376,16 @@ export default function App() {
           <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(320px, 1fr))', gap: '1.2rem', margin: '0 3rem 1.8rem 3rem' }}>
               <form onSubmit={handleVendaSubmit} style={{ background: '#fff', borderRadius: 24, padding: '1.2rem', display: 'grid', gap: '0.8rem', opacity: caixaAberto ? 1 : 0.7 }}>
-                <div style={{ fontWeight: 700, color: palette.emerald }}>Lançamento Manual de Venda</div>
+                <div style={{ fontWeight: 700, color: palette.emerald }}>Lançamento de Venda por Categoria</div>
+                <input
+                  disabled={!caixaAberto}
+                  type="text"
+                  required
+                  placeholder="Nome do produto"
+                  value={formVenda.produto}
+                  onChange={e => setFormVenda(prev => ({ ...prev, produto: e.target.value }))}
+                  style={{ padding: '0.8rem', borderRadius: 12, border: `1px solid ${palette.purpleLight}` }}
+                />
                 <select disabled={!caixaAberto} value={formVenda.loja} onChange={e => setFormVenda(prev => ({ ...prev, loja: e.target.value }))} style={{ padding: '0.8rem', borderRadius: 12, border: `1px solid ${palette.purpleLight}` }}>
                   {lojas.map(loja => <option key={loja} value={loja}>{loja}</option>)}
                 </select>
@@ -368,7 +393,6 @@ export default function App() {
                   {metodosPagamento.map(metodo => <option key={metodo} value={metodo}>{metodo}</option>)}
                 </select>
                 <input disabled={!caixaAberto} type="number" min="0.01" step="0.01" inputMode="decimal" required placeholder="Valor da venda" value={formVenda.valor} onChange={e => setFormVenda(prev => ({ ...prev, valor: e.target.value }))} style={{ padding: '0.8rem', borderRadius: 12, border: `1px solid ${palette.purpleLight}` }} />
-                <input disabled={!caixaAberto} type="text" placeholder="Descrição rápida (opcional)" value={formVenda.desc} onChange={e => setFormVenda(prev => ({ ...prev, desc: e.target.value }))} style={{ padding: '0.8rem', borderRadius: 12, border: `1px solid ${palette.purpleLight}` }} />
                 <button disabled={!caixaAberto} type="submit" style={{ background: caixaAberto ? palette.emerald : '#ddd', color: '#fff', border: 'none', borderRadius: 14, padding: '0.85rem', fontWeight: 700, cursor: caixaAberto ? 'pointer' : 'not-allowed' }}>+ Registrar Venda</button>
               </form>
 
@@ -410,7 +434,7 @@ export default function App() {
                       <td style={{ padding: '0.65rem', fontWeight: 700, color: t.tipo === 'entrada' ? palette.emerald : palette.red }}>{t.tipo === 'entrada' ? 'Venda' : 'Compra'}</td>
                       <td style={{ padding: '0.65rem' }}>{t.loja || '-'}</td>
                       <td style={{ padding: '0.65rem' }}>{t.metodoPagamento || '-'}</td>
-                      <td style={{ padding: '0.65rem' }}>{t.desc}</td>
+                      <td style={{ padding: '0.65rem' }}>{t.tipo === 'entrada' ? (t.produto || t.desc) : t.desc}</td>
                       <td style={{ padding: '0.65rem', color: t.tipo === 'entrada' ? palette.emerald : palette.red, fontWeight: 'bold' }}>{t.tipo === 'entrada' ? '+' : '-'} {formatBRL(Number(t.valor))}</td>
                       <td style={{ padding: '0.65rem' }}>{new Date(t.data).toLocaleDateString('pt-BR')}</td>
                     </tr>
@@ -468,6 +492,24 @@ export default function App() {
                   ))}
                 </tbody>
               </table>
+            </section>
+            <section style={{ background: '#fff', borderRadius: 24, padding: '1.2rem 1.4rem', marginTop: '1.2rem' }}>
+              <div style={{ fontWeight: 700, marginBottom: '1rem' }}>Gráfico de Vendas por Forma de Pagamento</div>
+              {metodosPagamento.map(metodo => {
+                const valor = graficoPagamentosDia[metodo];
+                const largura = `${(valor / maiorValorGrafico) * 100}%`;
+                return (
+                  <div key={metodo} style={{ marginBottom: '0.8rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontWeight: 700 }}>
+                      <span>{metodo}</span>
+                      <span>{formatBRL(valor)}</span>
+                    </div>
+                    <div style={{ width: '100%', height: 12, background: '#eee', borderRadius: 99 }}>
+                      <div style={{ width: largura, height: '100%', borderRadius: 99, background: palette.purpleVivid }} />
+                    </div>
+                  </div>
+                );
+              })}
             </section>
           </div>
         )}
