@@ -12,6 +12,7 @@ const palette = {
 
 const lojas = ['iFood Loja 1', 'iFood Loja 2', '99 Loja 1', '99 Loja 2'];
 const metodosPagamento = ['Pix', 'Dinheiro', 'Cartão'];
+const moduleIds = ['vendas', 'pedidos', 'financeiro', 'funcionarios', 'docs'];
 
 const initialTransactions = [
   { tipo: 'entrada', produto: 'Açaí 500ml', desc: 'Açaí 500ml', valor: 120, loja: 'iFood Loja 1', metodoPagamento: 'Pix', status: 'Confirmado', data: new Date().toISOString() },
@@ -43,7 +44,10 @@ export default function App() {
   });
   const [showSenha, setShowSenha] = useState(false);
   const [senhaInput, setSenhaInput] = useState('');
-  const [activeModule, setActiveModule] = useState('vendas');
+  const [activeModule, setActiveModule] = useState(() => {
+    const saved = localStorage.getItem('activeModule');
+    return saved && moduleIds.includes(saved) ? saved : 'vendas';
+  });
   const [filter, setFilter] = useState('tudo');
   const [novoFuncionario, setNovoFuncionario] = useState('');
   const [dataFechamento, setDataFechamento] = useState(new Date().toISOString().slice(0, 10));
@@ -90,6 +94,13 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('ultimoFechamento', JSON.stringify(ultimoFechamento));
   }, [ultimoFechamento]);
+  useEffect(() => {
+    if (!moduleIds.includes(activeModule)) {
+      setActiveModule('vendas');
+      return;
+    }
+    localStorage.setItem('activeModule', activeModule);
+  }, [activeModule]);
 
   const faturamento = transactions
     .filter(t => t.tipo === 'entrada')
